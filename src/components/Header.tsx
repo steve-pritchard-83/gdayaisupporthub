@@ -1,13 +1,32 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTickets } from '../context/TicketContext';
+import AdminAuthModal from './AdminAuthModal';
 import './Header.css';
 
 const Header: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useTickets();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleAdminClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (state.currentAdmin) {
+      // Already authenticated, go to admin panel
+      navigate('/admin');
+    } else {
+      // Show authentication modal
+      setShowAuthModal(true);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    // Authentication successful, navigate to admin panel
+    navigate('/admin');
+  };
 
   return (
     <header className="header">
@@ -49,8 +68,8 @@ const Header: React.FC = () => {
             >
               Knowledge Hub
             </Link>
-            <Link 
-              to="/admin" 
+            <button 
+              onClick={handleAdminClick}
               className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
             >
               Admin Panel
@@ -59,10 +78,17 @@ const Header: React.FC = () => {
                   {state.tickets.filter(t => t.status === 'pending').length}
                 </span>
               )}
-            </Link>
+            </button>
           </nav>
         </div>
       </div>
+      
+      {showAuthModal && (
+        <AdminAuthModal 
+          onClose={() => setShowAuthModal(false)} 
+          onAuthenticated={handleAuthSuccess}
+        />
+      )}
     </header>
   );
 };

@@ -87,6 +87,14 @@
   background-color: #e6c400;
 }
 
+.nav-link[type="button"] {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
 .badge {
   background-color: #dc3545;
   color: white;

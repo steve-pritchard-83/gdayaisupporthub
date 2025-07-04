@@ -52,8 +52,8 @@ const initialState: TicketState = {
     }
   ],
   adminUsers: [
-    { id: '1', name: 'Steve', isActive: true },
-    { id: '2', name: 'Nolan', isActive: true }
+    { id: '1', name: 'Steve', role: 'Lead Developer', isActive: true },
+    { id: '2', name: 'Nolan', role: 'Support Manager', isActive: true }
   ],
   currentAdmin: null
 };

@@ -35,6 +35,7 @@ export interface KnowledgeArticle {
 export interface AdminUser {
   id: string;
   name: string;
+  role: string;
   isActive: boolean;
 }
 
