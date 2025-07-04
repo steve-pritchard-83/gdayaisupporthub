@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Mail, Globe, Github, MessageSquare } from 'lucide-react';
+import { ExternalLink, Mail, Globe, MessageSquare } from 'lucide-react';
 import './Footer.css';
 
 const Footer: React.FC = () => {

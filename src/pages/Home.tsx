@@ -3,7 +3,7 @@ import { Plus, Bug, Lightbulb } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
 import TicketCard from '../components/TicketCard';
 import TicketForm from '../components/TicketForm';
-import type { TicketType, Priority } from '../types';
+
 
 const Home: React.FC = () => {
   const { state } = useTickets();

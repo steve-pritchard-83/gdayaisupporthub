@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Filter, MessageSquare, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Users, Filter, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
 import TicketCard from '../components/TicketCard';
 import TicketModal from '../components/TicketModal';
@@ -7,7 +7,7 @@ import AdminSelector from '../components/AdminSelector';
 import type { Ticket, TicketStatus } from '../types';
 
 const AdminPanel: React.FC = () => {
-  const { state, dispatch } = useTickets();
+  const { state } = useTickets();
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'bug' | 'feature'>('all');
