@@ -1,21 +1,13 @@
 import express from 'express';
 import { Client } from 'pg';
-import { Server } from 'socket.io';
-import { createServer } from 'http';
 import cors from 'cors';
-import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { fileURLToPath } from 'url';
-import { initializeTestData } from './init-db.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
-const server = createServer(app);
 
 // Environment-based configuration
 const isProduction = process.env.NODE_ENV === 'production';
+
 // Dynamic CORS configuration
 const corsOptions = {
   origin: (origin, callback) => {
@@ -47,44 +39,23 @@ const corsOptions = {
   credentials: true
 };
 
-const io = new Server(server, {
-  cors: corsOptions
-});
-
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Serve static files in production
-if (isProduction) {
-  app.use(express.static('dist'));
-}
-
-// Database setup
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: isProduction ? { rejectUnauthorized: false } : false
-});
-
-// Connect to database
-async function connectDatabase() {
-  try {
-    await client.connect();
-    console.log('Connected to PostgreSQL database');
-    
-    // Initialize database tables
-    await initializeTables();
-    
-    // Initialize test data if needed
-    await initializeTestData();
-  } catch (error) {
-    console.error('Database connection error:', error);
-    process.exit(1);
-  }
+// Database connection function (per-request in serverless)
+async function getDbClient() {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: isProduction ? { rejectUnauthorized: false } : false
+  });
+  
+  await client.connect();
+  return client;
 }
 
 // Initialize database tables
-async function initializeTables() {
+async function initializeTables(client) {
   try {
     // Create tickets table
     await client.query(`
@@ -133,17 +104,15 @@ async function initializeTables() {
     // Insert initial knowledge articles if none exist
     const articlesResult = await client.query("SELECT COUNT(*) as count FROM knowledge_articles");
     if (parseInt(articlesResult.rows[0].count) === 0) {
-      await insertInitialArticles();
+      await insertInitialArticles(client);
     }
-    
-    console.log('Database tables initialized');
   } catch (error) {
     console.error('Error initializing tables:', error);
   }
 }
 
 // Insert initial knowledge articles
-async function insertInitialArticles() {
+async function insertInitialArticles(client) {
   const articles = [
     {
       id: uuidv4(),
@@ -185,62 +154,18 @@ async function insertInitialArticles() {
   }
 }
 
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  
-  socket.on('join-admin', () => {
-    socket.join('admins');
-    console.log('Admin joined:', socket.id);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
-
 // API Routes
 
-// Get all tickets (non-archived only)
+// Get all tickets
 app.get('/api/tickets', async (req, res) => {
+  let client;
   try {
-    console.log('Fetching tickets...');
+    client = await getDbClient();
+    await initializeTables(client);
+    
     const result = await client.query("SELECT * FROM tickets WHERE archived = false ORDER BY created_at DESC");
     
-    // Transform field names to match frontend expectations
-    const tickets = result.rows.map(ticket => ({
-      id: ticket.id,
-      title: ticket.title,
-      description: ticket.description,
-      type: ticket.type,
-      status: ticket.status,
-      priority: ticket.priority,
-      submitterName: ticket.submitter_name,
-      submitterEmail: ticket.submitter_email,
-      createdAt: ticket.created_at,
-      updatedAt: ticket.updated_at,
-      comments: [] // Empty array for list view
-    }));
-    
-    console.log(`Found ${tickets.length} tickets`);
-    res.json(tickets);
-  } catch (error) {
-    console.error('Error fetching tickets:', error);
-    console.error('Database connection status:', client._connected);
-    res.status(500).json({ 
-      error: 'Failed to fetch tickets',
-      details: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
-
-// Get archived tickets (admin only)
-app.get('/api/tickets/archived', async (req, res) => {
-  try {
-    const result = await client.query("SELECT * FROM tickets WHERE archived = true ORDER BY updated_at DESC");
-    
-    // Transform field names to match frontend expectations
+    // Transform database field names to match frontend expectations
     const tickets = result.rows.map(ticket => ({
       id: ticket.id,
       title: ticket.title,
@@ -253,30 +178,81 @@ app.get('/api/tickets/archived', async (req, res) => {
       createdAt: ticket.created_at,
       updatedAt: ticket.updated_at,
       archived: Boolean(ticket.archived),
-      comments: [] // Empty array for list view
+      comments: []
     }));
     
     res.json(tickets);
   } catch (error) {
+    console.error('Error fetching tickets:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
-// Get single ticket with comments
-app.get('/api/tickets/:id', async (req, res) => {
-  const ticketId = req.params.id;
-  
+// Get archived tickets
+app.get('/api/tickets/archived', async (req, res) => {
+  let client;
   try {
-    const ticketResult = await client.query("SELECT * FROM tickets WHERE id = $1", [ticketId]);
+    client = await getDbClient();
+    await initializeTables(client);
     
+    const result = await client.query("SELECT * FROM tickets WHERE archived = true ORDER BY created_at DESC");
+    
+    // Transform database field names to match frontend expectations
+    const tickets = result.rows.map(ticket => ({
+      id: ticket.id,
+      title: ticket.title,
+      description: ticket.description,
+      type: ticket.type,
+      status: ticket.status,
+      priority: ticket.priority,
+      submitterName: ticket.submitter_name,
+      submitterEmail: ticket.submitter_email,
+      createdAt: ticket.created_at,
+      updatedAt: ticket.updated_at,
+      archived: Boolean(ticket.archived),
+      comments: []
+    }));
+    
+    res.json(tickets);
+  } catch (error) {
+    console.error('Error fetching archived tickets:', error);
+    res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
+  }
+});
+
+// Get specific ticket with comments
+app.get('/api/tickets/:id', async (req, res) => {
+  let client;
+  try {
+    client = await getDbClient();
+    await initializeTables(client);
+    
+    const ticketId = req.params.id;
+    
+    // Get ticket
+    const ticketResult = await client.query("SELECT * FROM tickets WHERE id = $1", [ticketId]);
     if (ticketResult.rows.length === 0) {
       return res.status(404).json({ error: 'Ticket not found' });
     }
-
-    const ticket = ticketResult.rows[0];
+    
+    // Get comments
     const commentsResult = await client.query("SELECT * FROM comments WHERE ticket_id = $1 ORDER BY created_at ASC", [ticketId]);
     
-    // Transform field names to match frontend expectations
+    const ticket = ticketResult.rows[0];
+    const comments = commentsResult.rows.map(comment => ({
+      id: comment.id,
+      ticketId: comment.ticket_id,
+      author: comment.author,
+      content: comment.content,
+      isAdminComment: Boolean(comment.is_admin_comment),
+      createdAt: comment.created_at
+    }));
+    
+    // Transform database field names to match frontend expectations
     const transformedTicket = {
       id: ticket.id,
       title: ticket.title,
@@ -288,240 +264,175 @@ app.get('/api/tickets/:id', async (req, res) => {
       submitterEmail: ticket.submitter_email,
       createdAt: ticket.created_at,
       updatedAt: ticket.updated_at,
-      comments: commentsResult.rows.map(comment => ({
-        id: comment.id,
-        ticketId: comment.ticket_id,
-        author: comment.author,
-        content: comment.content,
-        createdAt: comment.created_at,
-        isAdminComment: Boolean(comment.is_admin_comment)
-      }))
+      archived: Boolean(ticket.archived),
+      comments: comments
     };
     
     res.json(transformedTicket);
   } catch (error) {
+    console.error('Error fetching ticket:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Create new ticket
 app.post('/api/tickets', async (req, res) => {
-  const { title, description, type, priority, submitterName, submitterEmail } = req.body;
-  
-  if (!title || !description || !type || !submitterName || !submitterEmail) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
-  const ticket = {
-    id: uuidv4(),
-    title,
-    description,
-    type,
-    status: 'pending',
-    priority: priority || 'medium',
-    submitter_name: submitterName,
-    submitter_email: submitterEmail,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-
+  let client;
   try {
-    await client.query(
-      "INSERT INTO tickets (id, title, description, type, status, priority, submitter_name, submitter_email, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-      [ticket.id, ticket.title, ticket.description, ticket.type, ticket.status, ticket.priority, ticket.submitter_name, ticket.submitter_email, ticket.created_at, ticket.updated_at]
-    );
+    client = await getDbClient();
+    await initializeTables(client);
     
-    // Transform field names to match frontend expectations
-    const transformedTicket = {
-      id: ticket.id,
-      title: ticket.title,
-      description: ticket.description,
-      type: ticket.type,
-      status: ticket.status,
-      priority: ticket.priority,
-      submitterName: ticket.submitter_name,
-      submitterEmail: ticket.submitter_email,
-      createdAt: ticket.created_at,
-      updatedAt: ticket.updated_at,
-      comments: []
+    const { title, description, type, priority, submitterName, submitterEmail } = req.body;
+    
+    const ticket = {
+      id: uuidv4(),
+      title,
+      description,
+      type,
+      status: 'pending',
+      priority,
+      submitterName,
+      submitterEmail,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      archived: false
     };
     
-    // Notify admins of new ticket
-    io.to('admins').emit('new-ticket', transformedTicket);
+    await client.query(
+      "INSERT INTO tickets (id, title, description, type, status, priority, submitter_name, submitter_email, created_at, updated_at, archived) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+      [ticket.id, ticket.title, ticket.description, ticket.type, ticket.status, ticket.priority, ticket.submitterName, ticket.submitterEmail, ticket.createdAt, ticket.updatedAt, ticket.archived]
+    );
     
-    res.status(201).json(transformedTicket);
+    res.status(201).json(ticket);
   } catch (error) {
+    console.error('Error creating ticket:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Update ticket
 app.put('/api/tickets/:id', async (req, res) => {
-  const ticketId = req.params.id;
-  const { status, priority } = req.body;
-  
-  const updates = [];
-  const values = [];
-  let paramIndex = 1;
-  
-  if (status) {
-    updates.push(`status = $${paramIndex++}`);
-    values.push(status);
-  }
-  if (priority) {
-    updates.push(`priority = $${paramIndex++}`);
-    values.push(priority);
-  }
-  
-  if (updates.length === 0) {
-    return res.status(400).json({ error: 'No valid updates provided' });
-  }
-  
-  updates.push(`updated_at = $${paramIndex++}`);
-  values.push(new Date().toISOString());
-  values.push(ticketId);
-  
+  let client;
   try {
-    await client.query(
-      `UPDATE tickets SET ${updates.join(', ')} WHERE id = $${paramIndex}`,
-      values
+    client = await getDbClient();
+    await initializeTables(client);
+    
+    const ticketId = req.params.id;
+    const { title, description, type, status, priority } = req.body;
+    const updatedAt = new Date().toISOString();
+    
+    const result = await client.query(
+      "UPDATE tickets SET title = $1, description = $2, type = $3, status = $4, priority = $5, updated_at = $6 WHERE id = $7",
+      [title, description, type, status, priority, updatedAt, ticketId]
     );
     
-    // Get updated ticket and broadcast
-    const ticketResult = await client.query("SELECT * FROM tickets WHERE id = $1", [ticketId]);
-    if (ticketResult.rows.length > 0) {
-      const ticket = ticketResult.rows[0];
-      const transformedTicket = {
-        id: ticket.id,
-        title: ticket.title,
-        description: ticket.description,
-        type: ticket.type,
-        status: ticket.status,
-        priority: ticket.priority,
-        submitterName: ticket.submitter_name,
-        submitterEmail: ticket.submitter_email,
-        createdAt: ticket.created_at,
-        updatedAt: ticket.updated_at,
-        comments: []
-      };
-      io.emit('ticket-updated', transformedTicket);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Ticket not found' });
     }
     
     res.json({ message: 'Ticket updated successfully' });
   } catch (error) {
+    console.error('Error updating ticket:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Add comment to ticket
 app.post('/api/tickets/:id/comments', async (req, res) => {
-  const ticketId = req.params.id;
-  const { author, content, isAdminComment } = req.body;
-  
-  if (!author || !content) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
-
-  const comment = {
-    id: uuidv4(),
-    ticket_id: ticketId,
-    author,
-    content,
-    is_admin_comment: Boolean(isAdminComment),
-    created_at: new Date().toISOString()
-  };
-
+  let client;
   try {
-    await client.query(
-      "INSERT INTO comments (id, ticket_id, author, content, is_admin_comment, created_at) VALUES ($1, $2, $3, $4, $5, $6)",
-      [comment.id, comment.ticket_id, comment.author, comment.content, comment.is_admin_comment, comment.created_at]
-    );
+    client = await getDbClient();
+    await initializeTables(client);
     
-    // Update ticket's updated_at
-    await client.query("UPDATE tickets SET updated_at = $1 WHERE id = $2", [new Date().toISOString(), ticketId]);
+    const ticketId = req.params.id;
+    const { author, content, isAdminComment } = req.body;
     
-    // Transform field names to match frontend expectations
-    const transformedComment = {
-      id: comment.id,
-      ticketId: comment.ticket_id,
-      author: comment.author,
-      content: comment.content,
-      createdAt: comment.created_at,
-      isAdminComment: Boolean(comment.is_admin_comment)
+    const comment = {
+      id: uuidv4(),
+      ticketId,
+      author,
+      content,
+      isAdminComment: Boolean(isAdminComment),
+      createdAt: new Date().toISOString()
     };
     
-    // Broadcast comment to all users
-    io.emit('new-comment', transformedComment);
+    await client.query(
+      "INSERT INTO comments (id, ticket_id, author, content, is_admin_comment, created_at) VALUES ($1, $2, $3, $4, $5, $6)",
+      [comment.id, comment.ticketId, comment.author, comment.content, comment.isAdminComment, comment.createdAt]
+    );
     
-    res.status(201).json(transformedComment);
+    res.status(201).json(comment);
   } catch (error) {
+    console.error('Error adding comment:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Archive ticket
 app.patch('/api/tickets/:id/archive', async (req, res) => {
-  const ticketId = req.params.id;
-  
+  let client;
   try {
+    client = await getDbClient();
+    await initializeTables(client);
+    
+    const ticketId = req.params.id;
+    
     const result = await client.query("UPDATE tickets SET archived = true, updated_at = $1 WHERE id = $2 AND archived = false", [new Date().toISOString(), ticketId]);
     
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Ticket not found or already archived' });
     }
     
-    // Broadcast ticket archival to all users
-    io.emit('ticket-archived', { id: ticketId });
-    
     res.json({ message: 'Ticket archived successfully' });
   } catch (error) {
+    console.error('Error archiving ticket:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Restore archived ticket
 app.patch('/api/tickets/:id/restore', async (req, res) => {
-  const ticketId = req.params.id;
-  
+  let client;
   try {
+    client = await getDbClient();
+    await initializeTables(client);
+    
+    const ticketId = req.params.id;
+    
     const result = await client.query("UPDATE tickets SET archived = false, updated_at = $1 WHERE id = $2 AND archived = true", [new Date().toISOString(), ticketId]);
     
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Archived ticket not found' });
     }
     
-    // Get restored ticket and broadcast
-    const ticketResult = await client.query("SELECT * FROM tickets WHERE id = $1", [ticketId]);
-    if (ticketResult.rows.length > 0) {
-      const ticket = ticketResult.rows[0];
-      const transformedTicket = {
-        id: ticket.id,
-        title: ticket.title,
-        description: ticket.description,
-        type: ticket.type,
-        status: ticket.status,
-        priority: ticket.priority,
-        submitterName: ticket.submitter_name,
-        submitterEmail: ticket.submitter_email,
-        createdAt: ticket.created_at,
-        updatedAt: ticket.updated_at,
-        archived: Boolean(ticket.archived),
-        comments: []
-      };
-      io.emit('ticket-restored', transformedTicket);
-    }
-    
     res.json({ message: 'Ticket restored successfully' });
   } catch (error) {
+    console.error('Error restoring ticket:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Permanently delete ticket (admin only)
 app.delete('/api/tickets/:id/permanent', async (req, res) => {
-  const ticketId = req.params.id;
-  
+  let client;
   try {
+    client = await getDbClient();
+    await initializeTables(client);
+    
+    const ticketId = req.params.id;
+    
     // First, delete all comments associated with the ticket
     await client.query("DELETE FROM comments WHERE ticket_id = $1", [ticketId]);
     
@@ -532,18 +443,22 @@ app.delete('/api/tickets/:id/permanent', async (req, res) => {
       return res.status(404).json({ error: 'Archived ticket not found' });
     }
     
-    // Broadcast permanent deletion to admins
-    io.to('admins').emit('ticket-deleted-permanently', { id: ticketId });
-    
     res.json({ message: 'Ticket permanently deleted' });
   } catch (error) {
+    console.error('Error permanently deleting ticket:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Get all knowledge articles
 app.get('/api/articles', async (req, res) => {
+  let client;
   try {
+    client = await getDbClient();
+    await initializeTables(client);
+    
     const result = await client.query("SELECT * FROM knowledge_articles ORDER BY created_at DESC");
     
     // Parse tags from JSON string and transform field names
@@ -560,24 +475,35 @@ app.get('/api/articles', async (req, res) => {
     
     res.json(articles);
   } catch (error) {
+    console.error('Error fetching articles:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Update article views
 app.post('/api/articles/:id/view', async (req, res) => {
-  const articleId = req.params.id;
-  
+  let client;
   try {
+    client = await getDbClient();
+    await initializeTables(client);
+    
+    const articleId = req.params.id;
+    
     await client.query("UPDATE knowledge_articles SET views = views + 1 WHERE id = $1", [articleId]);
     res.json({ message: 'View count updated' });
   } catch (error) {
+    console.error('Error updating article views:', error);
     res.status(500).json({ error: error.message });
+  } finally {
+    if (client) await client.end();
   }
 });
 
 // Health check endpoint with database testing
 app.get('/api/health', async (req, res) => {
+  let client;
   try {
     console.log('🔍 Health check requested');
     console.log('Environment:', process.env.NODE_ENV || 'not set');
@@ -592,6 +518,9 @@ app.get('/api/health', async (req, res) => {
       });
     }
 
+    client = await getDbClient();
+    await initializeTables(client);
+    
     // Test database connection
     const result = await client.query('SELECT NOW() as current_time, version() as db_version');
     const ticketCount = await client.query('SELECT COUNT(*) as count FROM tickets');
@@ -617,35 +546,19 @@ app.get('/api/health', async (req, res) => {
       database_url_present: !!process.env.DATABASE_URL,
       timestamp: new Date().toISOString()
     });
+  } finally {
+    if (client) await client.end();
   }
 });
 
-// Serve React app for all other routes in production
-if (isProduction) {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../dist', 'index.html'));
-  });
-}
-
-const PORT = process.env.PORT || 3001;
-
-// Connect to database and start server
-connectDatabase().then(() => {
-  server.listen(PORT, () => {
+// For development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
-}).catch(error => {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-});
+}
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('Shutting down gracefully...');
-  await client.end();
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-}); 
+// Export for Vercel
+export default app; 
