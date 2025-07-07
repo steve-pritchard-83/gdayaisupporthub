@@ -6,6 +6,7 @@ import cors from 'cors';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { fileURLToPath } from 'url';
+import { initializeTestData } from './init-db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,6 +74,9 @@ async function connectDatabase() {
     
     // Initialize database tables
     await initializeTables();
+    
+    // Initialize test data if needed
+    await initializeTestData();
   } catch (error) {
     console.error('Database connection error:', error);
     process.exit(1);
@@ -95,7 +99,7 @@ async function initializeTables() {
         submitter_email TEXT NOT NULL,
         created_at TIMESTAMP NOT NULL,
         updated_at TIMESTAMP NOT NULL,
-        archived INTEGER DEFAULT 0
+        archived BOOLEAN DEFAULT FALSE
       )
     `);
 
@@ -106,7 +110,7 @@ async function initializeTables() {
         ticket_id TEXT NOT NULL,
         author TEXT NOT NULL,
         content TEXT NOT NULL,
-        is_admin_comment INTEGER DEFAULT 0,
+        is_admin_comment BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP NOT NULL,
         FOREIGN KEY (ticket_id) REFERENCES tickets (id)
       )
@@ -200,7 +204,8 @@ io.on('connection', (socket) => {
 // Get all tickets (non-archived only)
 app.get('/api/tickets', async (req, res) => {
   try {
-    const result = await client.query("SELECT * FROM tickets WHERE archived = 0 ORDER BY created_at DESC");
+    console.log('Fetching tickets...');
+    const result = await client.query("SELECT * FROM tickets WHERE archived = false ORDER BY created_at DESC");
     
     // Transform field names to match frontend expectations
     const tickets = result.rows.map(ticket => ({
@@ -217,16 +222,23 @@ app.get('/api/tickets', async (req, res) => {
       comments: [] // Empty array for list view
     }));
     
+    console.log(`Found ${tickets.length} tickets`);
     res.json(tickets);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching tickets:', error);
+    console.error('Database connection status:', client._connected);
+    res.status(500).json({ 
+      error: 'Failed to fetch tickets',
+      details: error.message,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 
 // Get archived tickets (admin only)
 app.get('/api/tickets/archived', async (req, res) => {
   try {
-    const result = await client.query("SELECT * FROM tickets WHERE archived = 1 ORDER BY updated_at DESC");
+    const result = await client.query("SELECT * FROM tickets WHERE archived = true ORDER BY updated_at DESC");
     
     // Transform field names to match frontend expectations
     const tickets = result.rows.map(ticket => ({
@@ -452,7 +464,7 @@ app.patch('/api/tickets/:id/archive', async (req, res) => {
   const ticketId = req.params.id;
   
   try {
-    const result = await client.query("UPDATE tickets SET archived = 1, updated_at = $1 WHERE id = $2 AND archived = 0", [new Date().toISOString(), ticketId]);
+    const result = await client.query("UPDATE tickets SET archived = true, updated_at = $1 WHERE id = $2 AND archived = false", [new Date().toISOString(), ticketId]);
     
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Ticket not found or already archived' });
@@ -472,7 +484,7 @@ app.patch('/api/tickets/:id/restore', async (req, res) => {
   const ticketId = req.params.id;
   
   try {
-    const result = await client.query("UPDATE tickets SET archived = 0, updated_at = $1 WHERE id = $2 AND archived = 1", [new Date().toISOString(), ticketId]);
+    const result = await client.query("UPDATE tickets SET archived = false, updated_at = $1 WHERE id = $2 AND archived = true", [new Date().toISOString(), ticketId]);
     
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Archived ticket not found' });
@@ -514,7 +526,7 @@ app.delete('/api/tickets/:id/permanent', async (req, res) => {
     await client.query("DELETE FROM comments WHERE ticket_id = $1", [ticketId]);
     
     // Then permanently delete the ticket (only if archived)
-    const result = await client.query("DELETE FROM tickets WHERE id = $1 AND archived = 1", [ticketId]);
+    const result = await client.query("DELETE FROM tickets WHERE id = $1 AND archived = true", [ticketId]);
     
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Archived ticket not found' });
