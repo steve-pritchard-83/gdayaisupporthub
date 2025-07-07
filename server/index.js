@@ -427,7 +427,7 @@ app.post('/api/tickets/:id/comments', async (req, res) => {
     ticket_id: ticketId,
     author,
     content,
-    is_admin_comment: isAdminComment ? 1 : 0,
+    is_admin_comment: Boolean(isAdminComment),
     created_at: new Date().toISOString()
   };
 
@@ -576,9 +576,48 @@ app.post('/api/articles/:id/view', async (req, res) => {
   }
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+// Health check endpoint with database testing
+app.get('/api/health', async (req, res) => {
+  try {
+    console.log('🔍 Health check requested');
+    console.log('Environment:', process.env.NODE_ENV || 'not set');
+    console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
+    
+    if (!process.env.DATABASE_URL) {
+      return res.status(500).json({ 
+        status: 'error',
+        message: 'DATABASE_URL not configured',
+        environment: process.env.NODE_ENV || 'not set',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Test database connection
+    const result = await client.query('SELECT NOW() as current_time, version() as db_version');
+    const ticketCount = await client.query('SELECT COUNT(*) as count FROM tickets');
+    const articleCount = await client.query('SELECT COUNT(*) as count FROM knowledge_articles');
+    
+    res.json({
+      status: 'healthy',
+      database: 'connected',
+      server_time: result.rows[0].current_time,
+      database_version: result.rows[0].db_version.split(' ')[0],
+      ticket_count: ticketCount.rows[0].count,
+      article_count: articleCount.rows[0].count,
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Health check failed:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+      code: error.code,
+      environment: process.env.NODE_ENV || 'not set',
+      database_url_present: !!process.env.DATABASE_URL,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Serve React app for all other routes in production
