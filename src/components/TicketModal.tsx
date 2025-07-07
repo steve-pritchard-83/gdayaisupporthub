@@ -1,22 +1,86 @@
-import React, { useState } from 'react';
-import { X, MessageSquare, Edit3, Save, Calendar, User, Mail, AlertTriangle, Lightbulb, Bug } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, MessageSquare, Edit3, Save, Calendar, User, Mail, AlertTriangle, Lightbulb, Bug, Trash2 } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
-import type { Ticket, TicketStatus } from '../types';
+import { ticketApi } from '../utils/api';
+import type { Ticket, TicketStatus, Comment } from '../types';
+
+// Utility function to normalize ticket data from API
+const normalizeTicket = (ticket: any): Ticket => {
+  return {
+    id: ticket.id,
+    title: ticket.title,
+    description: ticket.description,
+    type: ticket.type,
+    status: ticket.status,
+    priority: ticket.priority,
+    submitterName: ticket.submitterName || ticket.submitter_name,
+    submitterEmail: ticket.submitterEmail || ticket.submitter_email,
+    createdAt: ticket.createdAt || ticket.created_at,
+    updatedAt: ticket.updatedAt || ticket.updated_at,
+    comments: ticket.comments ? ticket.comments.map(normalizeComment) : []
+  };
+};
+
+// Utility function to normalize comment data from API
+const normalizeComment = (comment: any): Comment => {
+  return {
+    id: comment.id,
+    ticketId: comment.ticketId || comment.ticket_id,
+    author: comment.author,
+    content: comment.content,
+    createdAt: comment.createdAt || comment.created_at,
+    isAdminComment: comment.isAdminComment || comment.is_admin_comment
+  };
+};
 
 interface TicketModalProps {
   ticket: Ticket;
   onClose: () => void;
 }
 
-const TicketModal: React.FC<TicketModalProps> = ({ ticket, onClose }) => {
-  const { state, dispatch } = useTickets();
+const TicketModal: React.FC<TicketModalProps> = ({ ticket: initialTicket, onClose }) => {
+  const { state, updateTicket, archiveTicket, addComment } = useTickets();
+  const [ticket, setTicket] = useState<Ticket>(initialTicket);
   const [isEditing, setIsEditing] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [editedStatus, setEditedStatus] = useState(ticket.status);
-  const [editedPriority, setEditedPriority] = useState(ticket.priority);
+  const [editedStatus, setEditedStatus] = useState(initialTicket.status);
+  const [editedPriority, setEditedPriority] = useState(initialTicket.priority);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+
+  // Fetch full ticket data with comments when modal opens
+  useEffect(() => {
+    const fetchFullTicket = async () => {
+      if (!initialTicket.comments || initialTicket.comments.length === 0) {
+        setIsLoadingComments(true);
+        try {
+          const rawTicket = await ticketApi.getById(initialTicket.id);
+          const fullTicket = normalizeTicket(rawTicket);
+          setTicket(fullTicket);
+        } catch (error) {
+          console.error('Failed to load ticket comments:', error);
+          // Keep the initial ticket if fetch fails
+        } finally {
+          setIsLoadingComments(false);
+        }
+      }
+    };
+
+    fetchFullTicket();
+  }, [initialTicket.id, initialTicket.comments]);
 
   const formatDate = (dateString: string) => {
+    if (!dateString) {
+      return 'No date provided';
+    }
+    
     const date = new Date(dateString);
+    
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date string:', dateString);
+      return 'Invalid Date';
+    }
+    
     return date.toLocaleString('en-AU', {
       day: 'numeric',
       month: 'short',
@@ -26,45 +90,59 @@ const TicketModal: React.FC<TicketModalProps> = ({ ticket, onClose }) => {
     });
   };
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
     if (!state.currentAdmin) {
       alert('Please select an admin to add comments');
       return;
     }
 
-    dispatch({
-      type: 'ADD_COMMENT',
-      payload: {
+    setIsSubmitting(true);
+    try {
+      await addComment(ticket.id, {
         ticketId: ticket.id,
-        comment: {
-          ticketId: ticket.id,
-          author: state.currentAdmin.name,
-          content: newComment.trim(),
-          isAdminComment: true
-        }
-      }
-    });
-    setNewComment('');
+        author: state.currentAdmin.name,
+        content: newComment.trim(),
+        isAdminComment: true
+      });
+      
+      // Refresh the ticket data to get the updated comments
+      const rawTicket = await ticketApi.getById(ticket.id);
+      const updatedTicket = normalizeTicket(rawTicket);
+      setTicket(updatedTicket);
+      
+      setNewComment('');
+    } catch (error) {
+      alert('Failed to add comment. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleUpdateTicket = () => {
+  const handleUpdateTicket = async () => {
     if (!state.currentAdmin) {
       alert('Please select an admin to update tickets');
       return;
     }
 
-    dispatch({
-      type: 'UPDATE_TICKET',
-      payload: {
-        id: ticket.id,
-        updates: {
-          status: editedStatus,
-          priority: editedPriority
-        }
-      }
-    });
-    setIsEditing(false);
+    setIsSubmitting(true);
+    try {
+      await updateTicket(ticket.id, {
+        status: editedStatus,
+        priority: editedPriority
+      });
+      
+      // Refresh the ticket data to get the updated status/priority
+      const rawTicket = await ticketApi.getById(ticket.id);
+      const updatedTicket = normalizeTicket(rawTicket);
+      setTicket(updatedTicket);
+      
+      setIsEditing(false);
+    } catch (error) {
+      alert('Failed to update ticket. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getStatusClass = (status: string) => {
@@ -90,8 +168,38 @@ const TicketModal: React.FC<TicketModalProps> = ({ ticket, onClose }) => {
     return type === 'bug' ? <Bug size={20} /> : <Lightbulb size={20} />;
   };
 
+  const handleArchiveTicket = async () => {
+    if (!state.currentAdmin) {
+      alert('Please select an admin to archive tickets');
+      return;
+    }
+
+    const confirmArchive = window.confirm(
+      `Are you sure you want to archive this ticket?\n\nTitle: ${ticket.title}\nSubmitted by: ${ticket.submitterName}\n\nArchived tickets can be restored later from the admin panel.`
+    );
+
+    if (!confirmArchive) return;
+
+    setIsSubmitting(true);
+    try {
+      await archiveTicket(ticket.id);
+      onClose(); // Close the modal after successful archival
+    } catch (error) {
+      alert('Failed to archive ticket. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // Close modal when clicking on the overlay (outside the modal content)
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay" onClick={handleOverlayClick}>
       <div className="modal-content large">
         <div className="modal-header">
           <div className="ticket-header-info">
@@ -178,20 +286,30 @@ const TicketModal: React.FC<TicketModalProps> = ({ ticket, onClose }) => {
                       </select>
                     </div>
                     <div className="d-flex gap-2">
-                      <button className="btn btn-primary" onClick={handleUpdateTicket}>
+                      <button className="btn btn-primary" onClick={handleUpdateTicket} disabled={isSubmitting}>
                         <Save size={16} />
-                        Save Changes
+                        {isSubmitting ? 'Saving...' : 'Save Changes'}
                       </button>
-                      <button className="btn btn-outline" onClick={() => setIsEditing(false)}>
+                      <button className="btn btn-outline" onClick={() => setIsEditing(false)} disabled={isSubmitting}>
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <button className="btn btn-secondary" onClick={() => setIsEditing(true)}>
-                    <Edit3 size={16} />
-                    Edit Ticket
-                  </button>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-secondary" onClick={() => setIsEditing(true)}>
+                      <Edit3 size={16} />
+                      Edit Ticket
+                    </button>
+                    <button 
+                      className="btn btn-danger" 
+                      onClick={handleArchiveTicket}
+                      disabled={isSubmitting}
+                    >
+                      <Trash2 size={16} />
+                      {isSubmitting ? 'Archiving...' : 'Archive Ticket'}
+                    </button>
+                  </div>
                 )}
               </div>
             )}
@@ -199,10 +317,12 @@ const TicketModal: React.FC<TicketModalProps> = ({ ticket, onClose }) => {
             <div className="comments-section">
               <h3>
                 <MessageSquare size={20} />
-                Comments ({ticket.comments.length})
+                Comments ({ticket.comments?.length || 0})
               </h3>
               
-              {ticket.comments.length === 0 ? (
+              {isLoadingComments ? (
+                <p className="text-muted">Loading comments...</p>
+              ) : !ticket.comments || ticket.comments.length === 0 ? (
                 <p className="text-muted">No comments yet.</p>
               ) : (
                 <div className="comments-list">
@@ -234,10 +354,10 @@ const TicketModal: React.FC<TicketModalProps> = ({ ticket, onClose }) => {
                   <button 
                     className="btn btn-primary"
                     onClick={handleAddComment}
-                    disabled={!newComment.trim()}
+                    disabled={!newComment.trim() || isSubmitting}
                   >
                     <MessageSquare size={16} />
-                    Add Comment
+                    {isSubmitting ? 'Adding...' : 'Add Comment'}
                   </button>
                 </div>
               )}

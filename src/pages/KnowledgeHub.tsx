@@ -4,7 +4,7 @@ import { useTickets } from '../context/TicketContext';
 import type { KnowledgeArticle } from '../types';
 
 const KnowledgeHub: React.FC = () => {
-  const { state } = useTickets();
+  const { state, incrementArticleView } = useTickets();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
@@ -28,9 +28,13 @@ const KnowledgeHub: React.FC = () => {
     });
   };
 
-  const handleArticleClick = (article: KnowledgeArticle) => {
+  const handleArticleClick = async (article: KnowledgeArticle) => {
     setSelectedArticle(article);
-    // In a real app, you'd increment the view count here
+    try {
+      await incrementArticleView(article.id);
+    } catch (error) {
+      console.error('Failed to increment view count:', error);
+    }
   };
 
   if (selectedArticle) {

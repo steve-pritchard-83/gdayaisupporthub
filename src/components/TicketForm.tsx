@@ -8,7 +8,7 @@ interface TicketFormProps {
 }
 
 const TicketForm: React.FC<TicketFormProps> = ({ onClose }) => {
-  const { dispatch } = useTickets();
+  const { createTicket } = useTickets();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -17,8 +17,9 @@ const TicketForm: React.FC<TicketFormProps> = ({ onClose }) => {
     submitterName: '',
     submitterEmail: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title || !formData.description || !formData.submitterName) {
@@ -26,15 +27,18 @@ const TicketForm: React.FC<TicketFormProps> = ({ onClose }) => {
       return;
     }
 
-    dispatch({
-      type: 'ADD_TICKET',
-      payload: {
+    setIsSubmitting(true);
+    try {
+      await createTicket({
         ...formData,
         status: 'pending' as const
-      }
-    });
-
-    onClose();
+      });
+      onClose();
+    } catch (error) {
+      alert('Failed to submit ticket. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -176,7 +180,7 @@ const TicketForm: React.FC<TicketFormProps> = ({ onClose }) => {
             <button type="button" className="btn btn-outline" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
               <Send size={16} />
               Submit Ticket
             </button>

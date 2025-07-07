@@ -1,19 +1,21 @@
-import React from 'react';
-import { User, LogOut } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, LogOut, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useTickets } from '../context/TicketContext';
+import AdminAuthModal from './AdminAuthModal';
 
 const AdminSelector: React.FC = () => {
-  const { state, dispatch } = useTickets();
-
-  const handleAdminSelect = (adminName: string) => {
-    const admin = state.adminUsers.find(a => a.name === adminName);
-    if (admin) {
-      dispatch({ type: 'SET_ADMIN', payload: admin });
-    }
-  };
+  const { state, setAdmin } = useTickets();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch({ type: 'SET_ADMIN', payload: null as any });
+    setAdmin(null as any);
+    navigate('/');
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
   };
 
   if (state.currentAdmin) {
@@ -35,23 +37,24 @@ const AdminSelector: React.FC = () => {
   }
 
   return (
-    <div className="admin-selector">
-      <div className="admin-selector-header">
-        <User size={20} />
-        <span>Select Admin</span>
+    <>
+      <div className="admin-selector">
+        <button 
+          className="btn btn-primary"
+          onClick={() => setShowAuthModal(true)}
+        >
+          <Shield size={16} />
+          Admin Login
+        </button>
       </div>
-      <div className="admin-buttons">
-        {state.adminUsers.map(admin => (
-          <button
-            key={admin.id}
-            className="btn btn-primary"
-            onClick={() => handleAdminSelect(admin.name)}
-          >
-            {admin.name}
-          </button>
-        ))}
-      </div>
-    </div>
+
+      {showAuthModal && (
+        <AdminAuthModal
+          onClose={() => setShowAuthModal(false)}
+          onAuthenticated={handleAuthSuccess}
+        />
+      )}
+    </>
   );
 };
 

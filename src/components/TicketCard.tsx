@@ -9,7 +9,16 @@ interface TicketCardProps {
 
 const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
   const formatDate = (dateString: string) => {
+    if (!dateString) {
+      return 'No date';
+    }
+    
     const date = new Date(dateString);
+    
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
     return date.toLocaleDateString('en-AU', {
       day: 'numeric',
       month: 'short',
@@ -69,7 +78,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
           <span className="text-muted">{ticket.submitterName}</span>
         </div>
         
-        {ticket.comments.length > 0 && (
+        {ticket.comments && ticket.comments.length > 0 && (
           <div className="d-flex align-items-center gap-1">
             <MessageSquare size={14} />
             <span className="text-muted">{ticket.comments.length}</span>

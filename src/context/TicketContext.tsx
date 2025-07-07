@@ -1,181 +1,332 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Ticket, Comment, KnowledgeArticle, AdminUser } from '../types';
-import { v4 as uuidv4 } from 'uuid';
+import { ticketApi, articleApi } from '../utils/api';
+import { io, Socket } from 'socket.io-client';
 
 interface TicketState {
   tickets: Ticket[];
   articles: KnowledgeArticle[];
-  adminUsers: AdminUser[];
   currentAdmin: AdminUser | null;
+  loading: boolean;
+  error: string | null;
 }
 
-type TicketAction = 
-  | { type: 'ADD_TICKET'; payload: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt' | 'comments'> }
-  | { type: 'UPDATE_TICKET'; payload: { id: string; updates: Partial<Ticket> } }
-  | { type: 'ADD_COMMENT'; payload: { ticketId: string; comment: Omit<Comment, 'id' | 'createdAt'> } }
-  | { type: 'SET_ADMIN'; payload: AdminUser }
-  | { type: 'LOAD_INITIAL_DATA' };
+interface TicketContextType {
+  state: TicketState;
+  // Actions
+  loadTickets: () => Promise<void>;
+  loadArticles: () => Promise<void>;
+  createTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt' | 'comments'>) => Promise<void>;
+  updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
+  archiveTicket: (id: string) => Promise<void>;
+  loadArchivedTickets: () => Promise<Ticket[]>;
+  restoreTicket: (id: string) => Promise<void>;
+  deletePermanent: (id: string) => Promise<void>;
+  addComment: (ticketId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
+  setAdmin: (admin: AdminUser) => void;
+  incrementArticleView: (articleId: string) => Promise<void>;
+}
 
 const initialState: TicketState = {
   tickets: [],
-  articles: [
-    {
-      id: '1',
-      title: 'Getting Started with G\'day AI',
-      content: 'Welcome to G\'day AI! This guide will help you get started with our Open WebUI LLM tool. Learn how to create your first conversation, customize settings, and make the most of our AI assistant.',
-      category: 'Getting Started',
-      tags: ['beginner', 'setup', 'introduction'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      views: 45
-    },
-    {
-      id: '2',
-      title: 'Advanced Prompt Engineering',
-      content: 'Learn advanced techniques for crafting effective prompts that get better results from G\'day AI. Discover how to structure your requests, use context effectively, and optimize for specific use cases.',
-      category: 'Advanced',
-      tags: ['prompts', 'advanced', 'optimization'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      views: 32
-    },
-    {
-      id: '3',
-      title: 'Troubleshooting Common Issues',
-      content: 'Having trouble with G\'day AI? This article covers the most common issues users face and how to resolve them. From connection problems to unexpected responses, we\'ve got you covered.',
-      category: 'Troubleshooting',
-      tags: ['help', 'troubleshooting', 'common-issues'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      views: 78
-    }
-  ],
-  adminUsers: [
-    { id: '1', name: 'Steve', role: 'Lead Developer', isActive: true },
-    { id: '2', name: 'Nolan', role: 'Support Manager', isActive: true }
-  ],
-  currentAdmin: null
+  articles: [],
+  currentAdmin: null,
+  loading: false,
+  error: null
 };
 
-const ticketReducer = (state: TicketState, action: TicketAction): TicketState => {
-  switch (action.type) {
-    case 'ADD_TICKET':
-      const newTicket: Ticket = {
-        ...action.payload,
-        id: uuidv4(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        comments: []
-      };
-      return {
-        ...state,
-        tickets: [...state.tickets, newTicket]
-      };
-    
-    case 'UPDATE_TICKET':
-      return {
-        ...state,
-        tickets: state.tickets.map(ticket =>
-          ticket.id === action.payload.id
-            ? { ...ticket, ...action.payload.updates, updatedAt: new Date().toISOString() }
-            : ticket
-        )
-      };
-    
-    case 'ADD_COMMENT':
-      const comment: Comment = {
-        ...action.payload.comment,
-        id: uuidv4(),
-        createdAt: new Date().toISOString()
-      };
-      return {
-        ...state,
-        tickets: state.tickets.map(ticket =>
-          ticket.id === action.payload.ticketId
-            ? { ...ticket, comments: [...ticket.comments, comment], updatedAt: new Date().toISOString() }
-            : ticket
-        )
-      };
-    
-    case 'SET_ADMIN':
-      return {
-        ...state,
-        currentAdmin: action.payload
-      };
-    
-    case 'LOAD_INITIAL_DATA':
-      // Load some sample data for demonstration
-      const sampleTickets: Ticket[] = [
-        {
-          id: uuidv4(),
-          title: 'G\'day AI not responding to complex queries',
-          description: 'When I ask complex multi-part questions, G\'day AI sometimes doesn\'t respond or gives incomplete answers. This happens especially with technical questions about data analysis.',
-          type: 'bug',
-          status: 'pending',
-          priority: 'high',
-          submitterName: 'John Smith',
-          submitterEmail: 'john.smith@example.com',
-          createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          updatedAt: new Date(Date.now() - 86400000).toISOString(),
-          comments: []
-        },
-        {
-          id: uuidv4(),
-          title: 'Add support for file uploads',
-          description: 'It would be great if G\'day AI could analyze uploaded documents, images, and spreadsheets. This would make it much more useful for business workflows.',
-          type: 'feature',
-          status: 'in-progress',
-          priority: 'medium',
-          submitterName: 'Sarah Johnson',
-          submitterEmail: 'sarah.j@company.com',
-          createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-          updatedAt: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
-          comments: [
-            {
-              id: uuidv4(),
-              ticketId: '',
-              author: 'Steve',
-              content: 'Great suggestion! We\'re currently evaluating different approaches for file upload support. Will keep you updated on progress.',
-              createdAt: new Date(Date.now() - 43200000).toISOString(),
-              isAdminComment: true
-            }
-          ]
-        }
-      ];
-      
-      // Fix the comment ticketId references
-      sampleTickets[1].comments[0].ticketId = sampleTickets[1].id;
-      
-      return {
-        ...state,
-        tickets: sampleTickets
-      };
-    
-    default:
-      return state;
-  }
-};
-
-const TicketContext = createContext<{
-  state: TicketState;
-  dispatch: React.Dispatch<TicketAction>;
-} | null>(null);
+const TicketContext = createContext<TicketContextType | null>(null);
 
 interface TicketProviderProps {
   children: ReactNode;
 }
 
-export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(ticketReducer, initialState);
+// Utility function to normalize ticket data from API
+const normalizeTicket = (ticket: any): Ticket => {
+  return {
+    id: ticket.id,
+    title: ticket.title,
+    description: ticket.description,
+    type: ticket.type,
+    status: ticket.status,
+    priority: ticket.priority,
+    submitterName: ticket.submitterName || ticket.submitter_name,
+    submitterEmail: ticket.submitterEmail || ticket.submitter_email,
+    createdAt: ticket.createdAt || ticket.created_at,
+    updatedAt: ticket.updatedAt || ticket.updated_at,
+    comments: ticket.comments ? ticket.comments.map(normalizeComment) : []
+  };
+};
 
-  // Load initial data on mount
-  React.useEffect(() => {
-    dispatch({ type: 'LOAD_INITIAL_DATA' });
+// Utility function to normalize comment data from API
+const normalizeComment = (comment: any): Comment => {
+  return {
+    id: comment.id,
+    ticketId: comment.ticketId || comment.ticket_id,
+    author: comment.author,
+    content: comment.content,
+    createdAt: comment.createdAt || comment.created_at,
+    isAdminComment: comment.isAdminComment || comment.is_admin_comment
+  };
+};
+
+export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
+  const [state, setState] = useState<TicketState>(initialState);
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  // Initialize socket connection
+  useEffect(() => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
+    const newSocket = io(API_BASE_URL);
+    setSocket(newSocket);
+
+    // Listen for real-time updates
+    newSocket.on('new-ticket', (rawTicket: any) => {
+      const ticket = normalizeTicket(rawTicket);
+      setState(prev => ({
+        ...prev,
+        tickets: [ticket, ...prev.tickets]
+      }));
+    });
+
+    newSocket.on('ticket-updated', (rawUpdatedTicket: any) => {
+      const updatedTicket = normalizeTicket(rawUpdatedTicket);
+      setState(prev => ({
+        ...prev,
+        tickets: prev.tickets.map(ticket => 
+          ticket.id === updatedTicket.id ? updatedTicket : ticket
+        )
+      }));
+    });
+
+    newSocket.on('new-comment', (rawComment: any) => {
+      const comment = normalizeComment(rawComment);
+      setState(prev => ({
+        ...prev,
+        tickets: prev.tickets.map(ticket => 
+          ticket.id === comment.ticketId 
+            ? { ...ticket, comments: [...(ticket.comments || []), comment] }
+            : ticket
+        )
+      }));
+    });
+
+    newSocket.on('ticket-archived', (data: { id: string }) => {
+      setState(prev => ({
+        ...prev,
+        tickets: prev.tickets.filter(ticket => ticket.id !== data.id)
+      }));
+    });
+
+    newSocket.on('ticket-restored', (rawTicket: any) => {
+      const ticket = normalizeTicket(rawTicket);
+      setState(prev => ({
+        ...prev,
+        tickets: [ticket, ...prev.tickets]
+      }));
+    });
+
+    return () => {
+      newSocket.close();
+    };
   }, []);
 
+  // Join admin room when admin is set
+  useEffect(() => {
+    if (socket && state.currentAdmin) {
+      socket.emit('join-admin');
+    }
+  }, [socket, state.currentAdmin]);
+
+  // Load initial data
+  useEffect(() => {
+    loadTickets();
+    loadArticles();
+  }, []);
+
+  const loadTickets = async () => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    try {
+      const rawTickets = await ticketApi.getAll();
+      const tickets = rawTickets.map(normalizeTicket);
+      setState(prev => ({ ...prev, tickets, loading: false }));
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        loading: false, 
+        error: 'Failed to load tickets'
+      }));
+    }
+  };
+
+  const loadArticles = async () => {
+    try {
+      const articles = await articleApi.getAll();
+      setState(prev => ({ ...prev, articles }));
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to load articles'
+      }));
+    }
+  };
+
+  const createTicket = async (ticketData: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt' | 'comments'>) => {
+    try {
+      const newTicket = await ticketApi.create({
+        title: ticketData.title,
+        description: ticketData.description,
+        type: ticketData.type,
+        priority: ticketData.priority,
+        submitterName: ticketData.submitterName,
+        submitterEmail: ticketData.submitterEmail
+      });
+      
+      // Don't add to local state - let the Socket.io event handle it to avoid duplicates
+      // The server will broadcast the new ticket via Socket.io
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to create ticket'
+      }));
+      throw error;
+    }
+  };
+
+  const updateTicket = async (id: string, updates: Partial<Ticket>) => {
+    try {
+      await ticketApi.update(id, {
+        status: updates.status,
+        priority: updates.priority
+      });
+      
+      // Don't update local state - let the Socket.io event handle it to avoid duplicates
+      // The server will broadcast the updated ticket via Socket.io
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to update ticket'
+      }));
+      throw error;
+    }
+  };
+
+  const addComment = async (ticketId: string, commentData: Omit<Comment, 'id' | 'createdAt'>) => {
+    try {
+      const newComment = await ticketApi.addComment(ticketId, {
+        author: commentData.author,
+        content: commentData.content,
+        isAdminComment: commentData.isAdminComment
+      });
+      
+      // Don't update local state - let the Socket.io event handle it to avoid duplicates
+      // The server will broadcast the new comment via Socket.io
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to add comment'
+      }));
+      throw error;
+    }
+  };
+
+  const archiveTicket = async (id: string) => {
+    try {
+      await ticketApi.archive(id);
+      
+      // Don't update local state - let the Socket.io event handle it to avoid duplicates
+      // The server will broadcast the ticket archival via Socket.io
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to archive ticket'
+      }));
+      throw error;
+    }
+  };
+
+  const loadArchivedTickets = async (): Promise<Ticket[]> => {
+    try {
+      const rawTickets = await ticketApi.getArchived();
+      return rawTickets.map(normalizeTicket);
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to load archived tickets'
+      }));
+      throw error;
+    }
+  };
+
+  const restoreTicket = async (id: string) => {
+    try {
+      await ticketApi.restore(id);
+      
+      // Don't update local state - let the Socket.io event handle it to avoid duplicates
+      // The server will broadcast the ticket restoration via Socket.io
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to restore ticket'
+      }));
+      throw error;
+    }
+  };
+
+  const deletePermanent = async (id: string) => {
+    try {
+      await ticketApi.deletePermanent(id);
+      
+      // Permanent deletion doesn't restore the ticket, it's gone forever
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to permanently delete ticket'
+      }));
+      throw error;
+    }
+  };
+
+  const setAdmin = (admin: AdminUser) => {
+    setState(prev => ({ ...prev, currentAdmin: admin }));
+  };
+
+  const incrementArticleView = async (articleId: string) => {
+    try {
+      await articleApi.incrementView(articleId);
+      
+      // Update local state
+      setState(prev => ({
+        ...prev,
+        articles: prev.articles.map(article =>
+          article.id === articleId
+            ? { ...article, views: article.views + 1 }
+            : article
+        )
+      }));
+    } catch (error) {
+      console.error('Failed to increment article view:', error);
+    }
+  };
+
+  const contextValue: TicketContextType = {
+    state,
+    loadTickets,
+    loadArticles,
+    createTicket,
+    updateTicket,
+    archiveTicket,
+    loadArchivedTickets,
+    restoreTicket,
+    deletePermanent,
+    addComment,
+    setAdmin,
+    incrementArticleView
+  };
+
   return (
-    <TicketContext.Provider value={{ state, dispatch }}>
+    <TicketContext.Provider value={contextValue}>
       {children}
     </TicketContext.Provider>
   );

@@ -3,12 +3,14 @@ import { Plus, Bug, Lightbulb } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
 import TicketCard from '../components/TicketCard';
 import TicketForm from '../components/TicketForm';
-
+import TicketModal from '../components/TicketModal';
+import type { Ticket } from '../types';
 
 const Home: React.FC = () => {
   const { state } = useTickets();
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<'all' | 'bug' | 'feature'>('all');
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   const filteredTickets = state.tickets.filter(ticket => {
     if (filter === 'all') return true;
@@ -18,6 +20,30 @@ const Home: React.FC = () => {
   const recentTickets = filteredTickets
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 6);
+
+  const handleTicketClick = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedTicket(null);
+  };
+
+  if (state.loading) {
+    return (
+      <div className="container">
+        <div className="loading">Loading tickets...</div>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className="container">
+        <div className="error">Error: {state.error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -114,29 +140,32 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {recentTickets.length === 0 ? (
-          <div className="empty-state">
-            <h3>No tickets yet</h3>
-            <p>Be the first to submit a ticket and help improve G'day AI!</p>
-            <button 
-              className="btn btn-primary"
-              onClick={() => setShowForm(true)}
-            >
-              <Plus size={20} />
-              Submit First Ticket
-            </button>
-          </div>
-        ) : (
-          <div className="tickets-grid">
-            {recentTickets.map(ticket => (
-              <TicketCard key={ticket.id} ticket={ticket} />
-            ))}
-          </div>
-        )}
+        <div className="tickets-grid">
+          {recentTickets.length === 0 ? (
+            <div className="empty-state">
+              <p>No tickets found. Create your first ticket above!</p>
+            </div>
+          ) : (
+            recentTickets.map((ticket) => (
+              <TicketCard
+                key={ticket.id}
+                ticket={ticket}
+                onClick={() => handleTicketClick(ticket)}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       {showForm && (
         <TicketForm onClose={() => setShowForm(false)} />
+      )}
+
+      {selectedTicket && (
+        <TicketModal
+          ticket={selectedTicket}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );

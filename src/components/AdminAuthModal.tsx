@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Lock, Shield } from 'lucide-react';
+import { X, Mail, Lock, Shield } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
 
 interface AdminAuthModalProps {
@@ -7,32 +7,66 @@ interface AdminAuthModalProps {
   onAuthenticated: () => void;
 }
 
+// Hardcoded admin credentials
+const ADMIN_CREDENTIALS = [
+  {
+    id: 'steve',
+    email: 'Steve.Pritchard@discoveryparks.com.au',
+    name: 'Steve',
+    password: '123456',
+    role: 'Senior Administrator'
+  },
+  {
+    id: 'nolan',
+    email: 'nolan.sipos@discoveryparks.com.au',
+    name: 'Nolan',
+    password: '123456',
+    role: 'Administrator'
+  }
+];
+
 const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ onClose, onAuthenticated }) => {
-  const { state, dispatch } = useTickets();
-  const [selectedAdmin, setSelectedAdmin] = useState<string>('');
+  const { setAdmin } = useTickets();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedAdmin) {
-      setError('Please select an admin');
+    if (!email) {
+      setError('Please enter your email address');
       return;
     }
 
-    if (password !== '123456') {
+    if (!password) {
+      setError('Please enter your password');
+      return;
+    }
+
+    // Find admin by email and validate password
+    const admin = ADMIN_CREDENTIALS.find(a => a.email.toLowerCase() === email.toLowerCase());
+    
+    if (!admin) {
+      setError('Email address not found');
+      return;
+    }
+
+    if (admin.password !== password) {
       setError('Incorrect password');
       return;
     }
 
-    // Find and set the admin
-    const admin = state.adminUsers.find(a => a.name === selectedAdmin);
-    if (admin) {
-      dispatch({ type: 'SET_ADMIN', payload: admin });
-      onAuthenticated();
-      onClose();
-    }
+    // Set the authenticated admin
+    setAdmin({
+      id: admin.id,
+      name: admin.name,
+      role: admin.role,
+      isActive: true
+    });
+    
+    onAuthenticated();
+    onClose();
   };
 
   return (
@@ -55,30 +89,22 @@ const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ onClose, onAuthenticate
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
             <div className="auth-intro">
-              <p>Please select your admin profile and enter the password to access the admin panel.</p>
+              <p>Please enter your email address and password to access the admin panel.</p>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Select Admin *</label>
-              <div className="admin-selection">
-                {state.adminUsers.map(admin => (
-                  <label key={admin.id} className="admin-option">
-                    <input
-                      type="radio"
-                      name="admin"
-                      value={admin.name}
-                      checked={selectedAdmin === admin.name}
-                      onChange={(e) => setSelectedAdmin(e.target.value)}
-                    />
-                    <div className="admin-option-content">
-                      <User size={20} />
-                      <div>
-                        <strong>{admin.name}</strong>
-                        <p>{admin.role}</p>
-                      </div>
-                    </div>
-                  </label>
-                ))}
+              <label className="form-label" htmlFor="email">Email Address *</label>
+              <div className="password-input">
+                <Mail size={20} />
+                <input
+                  type="email"
+                  id="email"
+                  className="form-input"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
             </div>
 
@@ -90,7 +116,7 @@ const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ onClose, onAuthenticate
                   type="password"
                   id="password"
                   className="form-input"
-                  placeholder="Enter admin password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
