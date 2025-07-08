@@ -1,0 +1,32 @@
+[
+  {
+    "id": "6d0bb1f3-a61b-4fcb-b5b8-b531f8c7a1f4",
+    "title": "Getting Started with G'day AI",
+    "content": "Welcome to G'day AI! This comprehensive guide will help you get started with our Open WebUI LLM tool. Learn how to create your first conversation, customize settings, and make the most of our AI assistant.",
+    "category": "Getting Started",
+    "tags": "[\"beginner\",\"setup\",\"introduction\"]",
+    "created_at": "2025-07-08T04:00:46.275Z",
+    "updated_at": "2025-07-08T04:00:46.275Z",
+    "views": 126
+  },
+  {
+    "id": "f03e96d2-f6c5-4194-82e8-bdbe26ee4b14",
+    "title": "Advanced Prompt Engineering",
+    "content": "Master the art of prompt engineering with G'day AI. Learn advanced techniques for crafting effective prompts that get better results from our AI models.",
+    "category": "Advanced",
+    "tags": "[\"prompts\",\"advanced\",\"optimization\"]",
+    "created_at": "2025-07-08T04:00:46.275Z",
+    "updated_at": "2025-07-08T04:00:46.275Z",
+    "views": 89
+  },
+  {
+    "id": "30b66629-cfda-4452-9f7c-71fb0f07b5ef",
+    "title": "Troubleshooting Common Issues",
+    "content": "Having trouble with G'day AI? This comprehensive troubleshooting guide covers the most common issues users face and provides step-by-step solutions.",
+    "category": "Troubleshooting",
+    "tags": "[\"help\",\"troubleshooting\",\"common-issues\"]",
+    "created_at": "2025-07-08T04:00:46.275Z",
+    "updated_at": "2025-07-08T04:00:46.275Z",
+    "views": 203
+  }
+]

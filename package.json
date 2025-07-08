@@ -12,6 +12,7 @@
     "server:dev": "nodemon server/index.js"
   },
   "dependencies": {
+    "@libsql/client": "^0.5.2",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "421f947d-e311-4e9a-a26c-f0f023c131bc",
+    "title": "Test Ticket - Production Verification",
+    "description": "This is a test ticket created during production testing to verify the Turso database integration is working correctly.",
+    "type": "bug",
+    "status": "2025-07-08T05:55:50.461Z",
+    "priority": "421f947d-e311-4e9a-a26c-f0f023c131bc",
+    "submitter_name": "Test User",
+    "submitter_email": "test@example.com",
+    "created_at": "2025-07-08T05:55:50.197Z",
+    "updated_at": "2025-07-08T05:55:50.462Z",
+    "archived": false
+  }
+]

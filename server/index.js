@@ -2,6 +2,8 @@ import express from 'express';
 import { Client } from 'pg';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
+import { getTursoClient } from './turso-client.js';
+import { getJsonStorage } from './json-storage.js';
 
 const app = express();
 
@@ -45,13 +47,24 @@ app.use(express.json());
 
 // Database connection function (per-request in serverless)
 async function getDbClient() {
-  const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: isProduction ? { rejectUnauthorized: false } : false
-  });
+  // Option 1: Turso (SQLite edge database - recommended)
+  if (process.env.TURSO_DATABASE_URL) {
+    return getTursoClient();
+  }
   
-  await client.connect();
-  return client;
+  // Option 2: PostgreSQL (traditional)
+  if (process.env.DATABASE_URL) {
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: isProduction ? { rejectUnauthorized: false } : false
+    });
+    await client.connect();
+    return client;
+  }
+  
+  // Option 3: JSON files (zero setup - perfect for vibe coding)
+  console.log('🗂️  No database configured, using JSON file storage');
+  return getJsonStorage();
 }
 
 // Initialize database tables
@@ -507,30 +520,29 @@ app.get('/api/health', async (req, res) => {
   try {
     console.log('🔍 Health check requested');
     console.log('Environment:', process.env.NODE_ENV || 'not set');
+    console.log('TURSO_DATABASE_URL present:', !!process.env.TURSO_DATABASE_URL);
     console.log('DATABASE_URL present:', !!process.env.DATABASE_URL);
     
-    if (!process.env.DATABASE_URL) {
-      return res.status(500).json({ 
-        status: 'error',
-        message: 'DATABASE_URL not configured',
-        environment: process.env.NODE_ENV || 'not set',
-        timestamp: new Date().toISOString()
-      });
-    }
-
     client = await getDbClient();
     await initializeTables(client);
     
+    // Determine storage type
+    let storageType = 'JSON files';
+    if (process.env.TURSO_DATABASE_URL) {
+      storageType = 'Turso (SQLite Edge)';
+    } else if (process.env.DATABASE_URL) {
+      storageType = 'PostgreSQL';
+    }
+    
     // Test database connection
-    const result = await client.query('SELECT NOW() as current_time, version() as db_version');
     const ticketCount = await client.query('SELECT COUNT(*) as count FROM tickets');
     const articleCount = await client.query('SELECT COUNT(*) as count FROM knowledge_articles');
     
     res.json({
       status: 'healthy',
+      storage_type: storageType,
       database: 'connected',
-      server_time: result.rows[0].current_time,
-      database_version: result.rows[0].db_version.split(' ')[0],
+      server_time: new Date().toISOString(),
       ticket_count: ticketCount.rows[0].count,
       article_count: articleCount.rows[0].count,
       environment: process.env.NODE_ENV || 'development',
@@ -543,6 +555,7 @@ app.get('/api/health', async (req, res) => {
       message: error.message,
       code: error.code,
       environment: process.env.NODE_ENV || 'not set',
+      turso_url_present: !!process.env.TURSO_DATABASE_URL,
       database_url_present: !!process.env.DATABASE_URL,
       timestamp: new Date().toISOString()
     });

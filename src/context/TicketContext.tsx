@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Ticket, Comment, KnowledgeArticle, AdminUser } from '../types';
 import { ticketApi, articleApi } from '../utils/api';
-import { io, Socket } from 'socket.io-client';
+// import { io, Socket } from 'socket.io-client'; // Disabled for Vercel deployment
 
 interface TicketState {
   tickets: Ticket[];
@@ -73,9 +73,11 @@ const normalizeComment = (comment: any): Comment => {
 
 export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
   const [state, setState] = useState<TicketState>(initialState);
-  const [socket, setSocket] = useState<Socket | null>(null);
+  // const [socket, setSocket] = useState<Socket | null>(null); // Disabled for Vercel
 
-  // Initialize socket connection
+  // Socket.io initialization disabled for Vercel deployment
+  // Vercel doesn't support WebSocket connections
+  /*
   useEffect(() => {
     const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
     const newSocket = io(API_BASE_URL);
@@ -138,6 +140,7 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
       socket.emit('join-admin');
     }
   }, [socket, state.currentAdmin]);
+  */
 
   // Load initial data
   useEffect(() => {
@@ -183,8 +186,12 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
         submitterEmail: ticketData.submitterEmail
       });
       
-      // Don't add to local state - let the Socket.io event handle it to avoid duplicates
-      // The server will broadcast the new ticket via Socket.io
+      // Without socket.io, we need to update local state manually
+      const normalizedTicket = normalizeTicket(newTicket);
+      setState(prev => ({
+        ...prev,
+        tickets: [normalizedTicket, ...prev.tickets]
+      }));
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
@@ -201,8 +208,13 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
         priority: updates.priority
       });
       
-      // Don't update local state - let the Socket.io event handle it to avoid duplicates
-      // The server will broadcast the updated ticket via Socket.io
+      // Without socket.io, we need to update local state manually
+      setState(prev => ({
+        ...prev,
+        tickets: prev.tickets.map(ticket => 
+          ticket.id === id ? { ...ticket, ...updates } : ticket
+        )
+      }));
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
@@ -220,8 +232,16 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
         isAdminComment: commentData.isAdminComment
       });
       
-      // Don't update local state - let the Socket.io event handle it to avoid duplicates
-      // The server will broadcast the new comment via Socket.io
+      // Without socket.io, we need to update local state manually
+      const normalizedComment = normalizeComment(newComment);
+      setState(prev => ({
+        ...prev,
+        tickets: prev.tickets.map(ticket => 
+          ticket.id === ticketId 
+            ? { ...ticket, comments: [...(ticket.comments || []), normalizedComment] }
+            : ticket
+        )
+      }));
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
@@ -235,8 +255,11 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     try {
       await ticketApi.archive(id);
       
-      // Don't update local state - let the Socket.io event handle it to avoid duplicates
-      // The server will broadcast the ticket archival via Socket.io
+      // Without socket.io, we need to update local state manually
+      setState(prev => ({
+        ...prev,
+        tickets: prev.tickets.filter(ticket => ticket.id !== id)
+      }));
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
@@ -263,8 +286,8 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     try {
       await ticketApi.restore(id);
       
-      // Don't update local state - let the Socket.io event handle it to avoid duplicates
-      // The server will broadcast the ticket restoration via Socket.io
+      // Without socket.io, we need to reload tickets to show the restored one
+      await loadTickets();
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
@@ -277,12 +300,11 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
   const deletePermanent = async (id: string) => {
     try {
       await ticketApi.deletePermanent(id);
-      
-      // Permanent deletion doesn't restore the ticket, it's gone forever
+      // No need to update local state as this only affects archived tickets
     } catch (error) {
       setState(prev => ({ 
         ...prev, 
-        error: 'Failed to permanently delete ticket'
+        error: 'Failed to delete ticket permanently'
       }));
       throw error;
     }
@@ -295,17 +317,17 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
   const incrementArticleView = async (articleId: string) => {
     try {
       await articleApi.incrementView(articleId);
-      
       // Update local state
       setState(prev => ({
         ...prev,
-        articles: prev.articles.map(article =>
-          article.id === articleId
+        articles: prev.articles.map(article => 
+          article.id === articleId 
             ? { ...article, views: article.views + 1 }
             : article
         )
       }));
     } catch (error) {
+      // Don't show error for view increment failures
       console.error('Failed to increment article view:', error);
     }
   };
@@ -316,11 +338,11 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     loadArticles,
     createTicket,
     updateTicket,
+    addComment,
     archiveTicket,
     loadArchivedTickets,
     restoreTicket,
     deletePermanent,
-    addComment,
     setAdmin,
     incrementArticleView
   };
