@@ -3,7 +3,7 @@ import fsSync from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-// Super simple JSON file storage - perfect for vibe coding
+// Super simple JSON file storage - adapted for Vercel serverless
 class JsonStorage {
   constructor() {
     this.dataDir = path.join(process.cwd(), 'data');
@@ -11,18 +11,29 @@ class JsonStorage {
     this.articlesFile = path.join(this.dataDir, 'articles.json');
     this.commentsFile = path.join(this.dataDir, 'comments.json');
     
-    // Initialize files synchronously in constructor
-    this.initSync();
+    // For Vercel - we'll work with existing files only
+    this.isVercel = process.env.VERCEL || process.env.NODE_ENV === 'production';
+    
+    // Initialize files synchronously in constructor (only for local dev)
+    if (!this.isVercel) {
+      this.initSync();
+    }
   }
   
+  // Remove sync initialization that tries to write files
   initSync() {
+    // Skip file creation in Vercel environment
+    if (this.isVercel) {
+      return;
+    }
+    
     try {
-      // Create directory if it doesn't exist
+      // Create directory if it doesn't exist (local dev only)
       if (!fsSync.existsSync(this.dataDir)) {
         fsSync.mkdirSync(this.dataDir, { recursive: true });
       }
       
-      // Initialize files if they don't exist
+      // Initialize files if they don't exist (local dev only)
       if (!fsSync.existsSync(this.ticketsFile)) {
         fsSync.writeFileSync(this.ticketsFile, JSON.stringify([], null, 2));
       }
@@ -38,6 +49,11 @@ class JsonStorage {
   }
 
   async init() {
+    // Skip initialization in Vercel environment
+    if (this.isVercel) {
+      return;
+    }
+    
     try {
       await fs.mkdir(this.dataDir, { recursive: true });
       
@@ -51,6 +67,10 @@ class JsonStorage {
   }
 
   async ensureFileExists(filePath, defaultData) {
+    if (this.isVercel) {
+      return; // Skip file creation in Vercel
+    }
+    
     try {
       await fs.access(filePath);
     } catch {
@@ -64,11 +84,21 @@ class JsonStorage {
       return JSON.parse(data);
     } catch (error) {
       console.error(`Error reading ${filePath}:`, error);
+      // Return appropriate defaults based on file type
+      if (filePath.includes('articles.json')) {
+        return this.getDefaultArticles();
+      }
       return [];
     }
   }
 
   async writeJson(filePath, data) {
+    // Skip writing in Vercel environment
+    if (this.isVercel) {
+      console.log('Skipping file write in Vercel environment');
+      return;
+    }
+    
     try {
       await fs.writeFile(filePath, JSON.stringify(data, null, 2));
     } catch (error) {
@@ -135,7 +165,9 @@ class JsonStorage {
       
       if (articleIndex !== -1) {
         articles[articleIndex].views += 1;
-        await this.writeJson(this.articlesFile, articles);
+        if (!this.isVercel) {
+          await this.writeJson(this.articlesFile, articles);
+        }
         return { rowCount: 1 };
       }
       
@@ -158,8 +190,10 @@ class JsonStorage {
         archived: false
       };
       
-      tickets.push(newTicket);
-      await this.writeJson(this.ticketsFile, tickets);
+      if (!this.isVercel) {
+        tickets.push(newTicket);
+        await this.writeJson(this.ticketsFile, tickets);
+      }
       return { rows: [newTicket] };
     }
     
@@ -180,7 +214,9 @@ class JsonStorage {
           tickets[ticketIndex].updated_at = new Date().toISOString();
         }
         
-        await this.writeJson(this.ticketsFile, tickets);
+        if (!this.isVercel) {
+          await this.writeJson(this.ticketsFile, tickets);
+        }
         return { rows: [tickets[ticketIndex]], rowCount: 1 };
       }
       
@@ -192,8 +228,10 @@ class JsonStorage {
       const ticketIndex = tickets.findIndex(t => t.id === params[0] && t.archived === true);
       
       if (ticketIndex !== -1) {
-        tickets.splice(ticketIndex, 1);
-        await this.writeJson(this.ticketsFile, tickets);
+        if (!this.isVercel) {
+          tickets.splice(ticketIndex, 1);
+          await this.writeJson(this.ticketsFile, tickets);
+        }
         return { rowCount: 1 };
       }
       
@@ -206,7 +244,9 @@ class JsonStorage {
       const filteredComments = comments.filter(c => c.ticket_id !== params[0]);
       
       if (filteredComments.length !== originalLength) {
-        await this.writeJson(this.commentsFile, filteredComments);
+        if (!this.isVercel) {
+          await this.writeJson(this.commentsFile, filteredComments);
+        }
         return { rowCount: originalLength - filteredComments.length };
       }
       
@@ -224,8 +264,10 @@ class JsonStorage {
         created_at: params[5]
       };
       
-      comments.push(newComment);
-      await this.writeJson(this.commentsFile, comments);
+      if (!this.isVercel) {
+        comments.push(newComment);
+        await this.writeJson(this.commentsFile, comments);
+      }
       return { rows: [newComment] };
     }
     
@@ -242,8 +284,10 @@ class JsonStorage {
         views: params[7]
       };
       
-      articles.push(newArticle);
-      await this.writeJson(this.articlesFile, articles);
+      if (!this.isVercel) {
+        articles.push(newArticle);
+        await this.writeJson(this.articlesFile, articles);
+      }
       return { rows: [newArticle] };
     }
     
