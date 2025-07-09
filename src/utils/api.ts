@@ -91,6 +91,33 @@ export const articleApi = {
   incrementView: (id: string) => apiRequest(`/api/articles/${id}/view`, {
     method: 'POST',
   }),
+  
+  // Create new article (admin only)
+  create: (article: {
+    title: string;
+    content: string;
+    category: string;
+    tags: string[];
+  }) => apiRequest('/api/articles', {
+    method: 'POST',
+    body: JSON.stringify(article),
+  }),
+  
+  // Update article (admin only)
+  update: (id: string, article: {
+    title: string;
+    content: string;
+    category: string;
+    tags: string[];
+  }) => apiRequest('/api/articles', {
+    method: 'PUT',
+    body: JSON.stringify({ id, ...article }),
+  }),
+  
+  // Delete article (admin only)
+  delete: (id: string) => apiRequest(`/api/articles?id=${id}`, {
+    method: 'DELETE',
+  }),
 };
 
 // Health check

@@ -1,1 +1,122 @@
-[]
+[
+  {
+    "id": "beb28d6a-0d8b-4824-90ef-36579b05f190",
+    "ticket_id": "c495df68-f94b-4be2-a736-a564eca4567f",
+    "author": "Test Admin",
+    "content": "This is a test comment.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-09T02:13:09.613Z"
+  },
+  {
+    "id": "0e0cf6f9-d594-44ba-9a07-dec4957f7a06",
+    "ticket_id": "76d56c49-b08c-486e-b7d8-f941437a0b4f",
+    "author": "Test Admin",
+    "content": "This is a test comment.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-09T02:13:16.235Z"
+  },
+  {
+    "id": "comment-dark-mode-1",
+    "ticket_id": "feat-001-dark-mode",
+    "author": "Support Admin",
+    "content": "Thanks for this suggestion! Dark mode is definitely on our roadmap. We're planning to implement this in the next major release. I'll keep you updated on progress.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-08T15:30:00.000Z"
+  },
+  {
+    "id": "comment-dark-mode-2",
+    "ticket_id": "feat-001-dark-mode",
+    "author": "Sarah Chen",
+    "content": "That's great to hear! Would it be possible to also include an auto-switch based on system preferences?",
+    "is_admin_comment": false,
+    "created_at": "2025-07-08T16:15:00.000Z"
+  },
+  {
+    "id": "comment-dark-mode-3",
+    "ticket_id": "feat-001-dark-mode",
+    "author": "Support Admin",
+    "content": "Absolutely! Auto-switching based on system preferences (prefers-color-scheme) is definitely part of the plan. We'll also include a manual toggle for users who want to override their system settings.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-08T16:45:00.000Z"
+  },
+  {
+    "id": "comment-notifications-1",
+    "ticket_id": "feat-002-notifications",
+    "author": "Product Manager",
+    "content": "This is a high-priority request that we're actively working on. We're evaluating email service providers and working on the notification templates. Expected timeline is 2-3 weeks for initial implementation.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-07T10:30:00.000Z"
+  },
+  {
+    "id": "comment-notifications-2",
+    "ticket_id": "feat-002-notifications",
+    "author": "Mike Rodriguez",
+    "content": "Fantastic! Will users be able to customize which notifications they receive? Some might only want critical updates.",
+    "is_admin_comment": false,
+    "created_at": "2025-07-07T11:00:00.000Z"
+  },
+  {
+    "id": "comment-notifications-3",
+    "ticket_id": "feat-002-notifications",
+    "author": "Product Manager",
+    "content": "Yes! We're designing a comprehensive notification preferences panel where users can choose:\n• Which events trigger emails\n• Frequency (immediate, daily digest, weekly)\n• Email format preferences\n• Opt-out options for specific notification types",
+    "is_admin_comment": true,
+    "created_at": "2025-07-07T11:15:00.000Z"
+  },
+  {
+    "id": "comment-attachments-1",
+    "ticket_id": "feat-003-file-attachments",
+    "author": "Technical Lead",
+    "content": "We're analyzing the technical requirements for file attachments. Key considerations:\n• Security scanning for uploaded files\n• CDN integration for fast delivery\n• Cost implications for storage\n\nWe'll need to implement virus scanning and validate file types carefully.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-06T17:30:00.000Z"
+  },
+  {
+    "id": "comment-attachments-2",
+    "ticket_id": "feat-003-file-attachments",
+    "author": "Alex Thompson",
+    "content": "Security is definitely important! Would it be possible to support .log files? Those are crucial for debugging issues.",
+    "is_admin_comment": false,
+    "created_at": "2025-07-06T18:00:00.000Z"
+  },
+  {
+    "id": "comment-attachments-3",
+    "ticket_id": "feat-003-file-attachments",
+    "author": "Technical Lead",
+    "content": "Absolutely! .log files are essential for technical support. Our planned supported formats include:\n• Images: jpg, png, gif, webp\n• Documents: pdf, txt, md\n• Archives: zip (contents will be scanned)\n• Logs: .log, .txt, .json\n• Code: most common extensions with syntax highlighting",
+    "is_admin_comment": true,
+    "created_at": "2025-07-06T18:30:00.000Z"
+  },
+  {
+    "id": "comment-search-1",
+    "ticket_id": "feat-004-search-filters",
+    "author": "UX Designer",
+    "content": "Great suggestion! We're working on wireframes for an advanced search interface. The design will include:\n• Quick filter buttons for common searches\n• Advanced filter panel that slides out\n• Search result highlighting\n• Saved search functionality\n\nWould love to get your feedback once we have mockups ready!",
+    "is_admin_comment": true,
+    "created_at": "2025-07-05T14:20:00.000Z"
+  },
+  {
+    "id": "comment-sso-1",
+    "ticket_id": "feat-008-sso-integration",
+    "author": "Security Team",
+    "content": "SSO integration is critical for our enterprise customers. We're prioritizing this feature and have begun security reviews. Current plan includes:\n• Google Workspace integration (Phase 1)\n• Microsoft Azure AD (Phase 1) \n• Okta and Auth0 (Phase 2)\n• Custom SAML providers (Phase 3)\n\nPhase 1 should be ready within 4-6 weeks.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-01T14:00:00.000Z"
+  },
+  {
+    "id": "comment-sso-2",
+    "ticket_id": "feat-008-sso-integration",
+    "author": "Lisa Anderson",
+    "content": "Excellent! We use Azure AD, so Phase 1 timing works perfectly. Will there be any migration process needed for existing accounts?",
+    "is_admin_comment": false,
+    "created_at": "2025-07-01T14:30:00.000Z"
+  },
+  {
+    "id": "comment-sso-3",
+    "ticket_id": "feat-008-sso-integration",
+    "author": "Security Team",
+    "content": "We're designing a smooth migration process! Existing users will be able to:\n• Link their current account to SSO during first SSO login\n• Maintain all their ticket history and preferences\n• Keep the same email address as their account identifier\n\nWe'll provide detailed migration guides before rollout.",
+    "is_admin_comment": true,
+    "created_at": "2025-07-01T15:00:00.000Z"
+  }
+]

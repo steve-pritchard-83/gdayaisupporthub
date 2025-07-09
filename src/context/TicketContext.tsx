@@ -26,6 +26,10 @@ interface TicketContextType {
   addComment: (ticketId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
   setAdmin: (admin: AdminUser) => void;
   incrementArticleView: (articleId: string) => Promise<void>;
+  // Article management (admin only)
+  createArticle: (article: Omit<KnowledgeArticle, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => Promise<void>;
+  updateArticle: (id: string, article: Omit<KnowledgeArticle, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => Promise<void>;
+  deleteArticle: (id: string) => Promise<void>;
 }
 
 const initialState: TicketState = {
@@ -332,6 +336,58 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     }
   };
 
+  const createArticle = async (articleData: Omit<KnowledgeArticle, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => {
+    try {
+      const newArticle = await articleApi.create(articleData);
+      setState(prev => ({
+        ...prev,
+        articles: [newArticle, ...prev.articles]
+      }));
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to create article'
+      }));
+      throw error;
+    }
+  };
+
+  const updateArticle = async (id: string, articleData: Omit<KnowledgeArticle, 'id' | 'createdAt' | 'updatedAt' | 'views'>) => {
+    try {
+      const updatedArticle = await articleApi.update(id, articleData);
+      setState(prev => ({
+        ...prev,
+        articles: prev.articles.map(article =>
+          article.id === id
+            ? { ...article, ...updatedArticle }
+            : article
+        )
+      }));
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to update article'
+      }));
+      throw error;
+    }
+  };
+
+  const deleteArticle = async (id: string) => {
+    try {
+      await articleApi.delete(id);
+      setState(prev => ({
+        ...prev,
+        articles: prev.articles.filter(article => article.id !== id)
+      }));
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Failed to delete article'
+      }));
+      throw error;
+    }
+  };
+
   const contextValue: TicketContextType = {
     state,
     loadTickets,
@@ -344,7 +400,10 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     restoreTicket,
     deletePermanent,
     setAdmin,
-    incrementArticleView
+    incrementArticleView,
+    createArticle,
+    updateArticle,
+    deleteArticle
   };
 
   return (

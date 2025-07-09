@@ -1,83 +1,6 @@
-// Articles endpoint for Vercel serverless functions
-import { getTursoClient } from '../server/turso-client.js';
+// Articles endpoint for Vercel serverless functions - JSON storage only
 import { getJsonStorage } from '../server/json-storage.js';
-import { v4 as uuidv4 } from 'uuid';
-
-async function getDbClient() {
-  if (process.env.TURSO_DATABASE_URL) {
-    return getTursoClient();
-  }
-  
-  console.log('🗂️  No database configured, using JSON file storage');
-  return getJsonStorage();
-}
-
-async function initializeTables(client) {
-  try {
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS knowledge_articles (
-        id TEXT PRIMARY KEY,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        category TEXT NOT NULL,
-        tags TEXT NOT NULL,
-        created_at TIMESTAMP NOT NULL,
-        updated_at TIMESTAMP NOT NULL,
-        views INTEGER DEFAULT 0
-      )
-    `);
-
-    // Insert initial knowledge articles if none exist
-    const articlesResult = await client.query("SELECT COUNT(*) as count FROM knowledge_articles");
-    if (parseInt(articlesResult.rows[0].count) === 0) {
-      await insertInitialArticles(client);
-    }
-  } catch (error) {
-    console.error('Error initializing tables:', error);
-  }
-}
-
-async function insertInitialArticles(client) {
-  const articles = [
-    {
-      id: uuidv4(),
-      title: "Getting Started with G'day AI",
-      content: "Welcome to G'day AI! This guide will help you get started with our Open WebUI LLM tool. Learn how to create your first conversation, customize settings, and make the most of our AI assistant.",
-      category: "Getting Started",
-      tags: JSON.stringify(["beginner", "setup", "introduction"]),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      views: 45
-    },
-    {
-      id: uuidv4(),
-      title: "Advanced Prompt Engineering",
-      content: "Learn advanced techniques for crafting effective prompts that get better results from G'day AI. Discover how to structure your requests, use context effectively, and optimize for specific use cases.",
-      category: "Advanced",
-      tags: JSON.stringify(["prompts", "advanced", "optimization"]),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      views: 32
-    },
-    {
-      id: uuidv4(),
-      title: "Troubleshooting Common Issues",
-      content: "Having trouble with G'day AI? This article covers the most common issues users face and how to resolve them. From connection problems to unexpected responses, we've got you covered.",
-      category: "Troubleshooting",
-      tags: JSON.stringify(["help", "troubleshooting", "common-issues"]),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      views: 78
-    }
-  ];
-
-  for (const article of articles) {
-    await client.query(
-      "INSERT INTO knowledge_articles (id, title, content, category, tags, created_at, updated_at, views) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [article.id, article.title, article.content, article.category, article.tags, article.created_at, article.updated_at, article.views]
-    );
-  }
-}
+import { randomUUID } from 'crypto';
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -90,37 +13,105 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (req.method !== 'GET') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
-
-  let client;
   try {
-    client = await getDbClient();
-    await initializeTables(client);
+    const storage = getJsonStorage();
     
-    const result = await client.query("SELECT * FROM knowledge_articles ORDER BY created_at DESC");
-    
-    // Parse tags from JSON string and transform field names
-    const articles = result.rows.map(article => ({
-      id: article.id,
-      title: article.title,
-      content: article.content,
-      category: article.category,
-      tags: JSON.parse(article.tags),
-      createdAt: article.created_at,
-      updatedAt: article.updated_at,
-      views: article.views
-    }));
-    
-    res.json(articles);
-  } catch (error) {
-    console.error('Error fetching articles:', error);
-    res.status(500).json({ error: error.message });
-  } finally {
-    if (client && client.end) {
-      await client.end();
+    if (req.method === 'GET') {
+      const result = await storage.query("SELECT * FROM knowledge_articles ORDER BY created_at DESC");
+      
+      // Transform database field names to match frontend expectations
+      const articles = result.rows.map(article => ({
+        id: article.id,
+        title: article.title,
+        content: article.content,
+        category: article.category,
+        tags: typeof article.tags === 'string' ? JSON.parse(article.tags) : article.tags,
+        createdAt: article.created_at,
+        updatedAt: article.updated_at,
+        views: article.views || 0
+      }));
+      
+      res.json(articles);
+    } else if (req.method === 'POST') {
+      const { title, content, category, tags } = req.body;
+      
+      if (!title || !content || !category) {
+        return res.status(400).json({ error: 'Title, content, and category are required' });
+      }
+      
+      const articleId = randomUUID();
+      const now = new Date().toISOString();
+      
+      const result = await storage.query(
+        `INSERT INTO knowledge_articles (id, title, content, category, tags, created_at, updated_at, views) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [articleId, title, content, category, JSON.stringify(tags || []), now, now, 0]
+      );
+      
+      const newArticle = {
+        id: articleId,
+        title,
+        content,
+        category,
+        tags: tags || [],
+        createdAt: now,
+        updatedAt: now,
+        views: 0
+      };
+      
+      res.status(201).json(newArticle);
+    } else if (req.method === 'PUT') {
+      const { id, title, content, category, tags } = req.body;
+      
+      if (!id || !title || !content || !category) {
+        return res.status(400).json({ error: 'ID, title, content, and category are required' });
+      }
+      
+      const now = new Date().toISOString();
+      
+      const result = await storage.query(
+        `UPDATE knowledge_articles 
+         SET title = ?, content = ?, category = ?, tags = ?, updated_at = ? 
+         WHERE id = ?`,
+        [title, content, category, JSON.stringify(tags || []), now, id]
+      );
+      
+      if (result.changes === 0) {
+        return res.status(404).json({ error: 'Article not found' });
+      }
+      
+      const updatedArticle = {
+        id,
+        title,
+        content,
+        category,
+        tags: tags || [],
+        updatedAt: now
+      };
+      
+      res.json(updatedArticle);
+    } else if (req.method === 'DELETE') {
+      const { id } = req.query;
+      
+      if (!id) {
+        return res.status(400).json({ error: 'Article ID is required' });
+      }
+      
+      const result = await storage.query(
+        'DELETE FROM knowledge_articles WHERE id = ?',
+        [id]
+      );
+      
+      if (result.changes === 0) {
+        return res.status(404).json({ error: 'Article not found' });
+      }
+      
+      res.json({ message: 'Article deleted successfully' });
+    } else {
+      res.status(405).json({ error: 'Method not allowed' });
     }
+  } catch (error) {
+    console.error('Error in articles endpoint:', error);
+    res.status(500).json({ error: error.message });
   }
 } 

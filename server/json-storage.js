@@ -106,7 +106,7 @@ class JsonStorage {
       if (sqlLower.includes('where archived = true')) {
         return { rows: tickets.filter(t => t.archived) };
       }
-      if (sqlLower.includes('where id = $1')) {
+      if (sqlLower.includes('where id = ?')) {
         const ticket = tickets.find(t => t.id === params[0]);
         return { rows: ticket ? [ticket] : [] };
       }
@@ -117,7 +117,7 @@ class JsonStorage {
     if (sqlLower.includes('select * from comments')) {
       const comments = await this.readJson(this.commentsFile);
       
-      if (sqlLower.includes('where ticket_id = $1')) {
+      if (sqlLower.includes('where ticket_id = ?')) {
         return { rows: comments.filter(c => c.ticket_id === params[0]) };
       }
       

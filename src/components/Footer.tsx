@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Mail, Globe, MessageSquare } from 'lucide-react';
+import { ExternalLink, Mail, Globe } from 'lucide-react';
 import './Footer.css';
 
 const Footer: React.FC = () => {
@@ -53,9 +53,9 @@ const Footer: React.FC = () => {
             <h3>Support</h3>
             <ul className="footer-links">
               <li>
-                <a href="mailto:support@gdaygroup.com.au">
+                <a href="mailto:steve.pritchard@discoveryparks.com.au">
                   <Mail size={14} />
-                  support@gdaygroup.com.au
+                  steve.pritchard@discoveryparks.com.au
                 </a>
               </li>
               <li>
@@ -64,25 +64,10 @@ const Footer: React.FC = () => {
                   G'day Group Website
                 </a>
               </li>
-              <li>
-                <MessageSquare size={14} />
-                Submit a Ticket
-              </li>
             </ul>
           </div>
 
-          <div className="footer-section">
-            <h3>About</h3>
-            <p className="footer-about">
-              Built with modern web technologies to provide the best support experience 
-              for G'day AI users. Managed by Steve and Nolan.
-            </p>
-            <div className="footer-tech">
-              <span className="tech-badge">React</span>
-              <span className="tech-badge">TypeScript</span>
-              <span className="tech-badge">Vite</span>
-            </div>
-          </div>
+
         </div>
 
         <div className="footer-bottom">

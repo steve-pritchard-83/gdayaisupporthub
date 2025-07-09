@@ -1,15 +1,5 @@
-// Individual ticket operations for Vercel serverless functions
-import { getTursoClient } from '../../server/turso-client.js';
+// Individual ticket operations for Vercel serverless functions - JSON storage only
 import { getJsonStorage } from '../../server/json-storage.js';
-
-async function getDbClient() {
-  if (process.env.TURSO_DATABASE_URL) {
-    return getTursoClient();
-  }
-  
-  console.log('🗂️  No database configured, using JSON file storage');
-  return getJsonStorage();
-}
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -23,21 +13,20 @@ export default async function handler(req, res) {
   }
 
   const { id } = req.query;
-  let client;
   
   try {
-    client = await getDbClient();
+    const storage = getJsonStorage();
     
     if (req.method === 'GET') {
       // Get specific ticket with comments
-      const ticketResult = await client.query("SELECT * FROM tickets WHERE id = ?", [id]);
+      const ticketResult = await storage.query("SELECT * FROM tickets WHERE id = ?", [id]);
       
       if (ticketResult.rows.length === 0) {
         return res.status(404).json({ error: 'Ticket not found' });
       }
       
       const ticket = ticketResult.rows[0];
-      const commentsResult = await client.query("SELECT * FROM comments WHERE ticket_id = ? ORDER BY created_at ASC", [id]);
+      const commentsResult = await storage.query("SELECT * FROM comments WHERE ticket_id = ? ORDER BY created_at ASC", [id]);
       
       const response = {
         id: ticket.id,
@@ -66,7 +55,7 @@ export default async function handler(req, res) {
       // Update ticket
       const { status, priority } = req.body;
       
-      const result = await client.query(
+      const result = await storage.query(
         "UPDATE tickets SET status = ?, priority = ?, updated_at = ? WHERE id = ?",
         [status, priority, new Date().toISOString(), id]
       );
@@ -82,9 +71,5 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Error in ticket operations:', error);
     res.status(500).json({ error: error.message });
-  } finally {
-    if (client && client.end) {
-      await client.end();
-    }
   }
 } 

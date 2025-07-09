@@ -1,16 +1,19 @@
-// Ultra-simple health check
-export default function handler(req, res) {
+// Health check endpoint - JSON storage only
+export default async function handler(req, res) {
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
 
-  res.status(200).json({
+  res.json({
     status: 'healthy',
-    message: 'API is working!',
     timestamp: new Date().toISOString(),
-    turso_configured: !!process.env.TURSO_DATABASE_URL
+    storage_type: 'json_files',
+    environment: process.env.NODE_ENV || 'development'
   });
 } 
