@@ -119,6 +119,7 @@ body {
   background-color: var(--surface-secondary);
   color: var(--text-primary);
   line-height: 1.6;
+  padding-top: 100px; /* Compensate for fixed header */
   /* Override default Vite CSS */
   display: block !important;
   place-items: unset !important;

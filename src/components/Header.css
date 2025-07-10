@@ -2,11 +2,12 @@
   background-color: var(--text-primary);
   border-bottom: 2px solid var(--primary-yellow);
   box-shadow: var(--shadow-lg);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   width: 100%;
-  min-width: 100%;
   transition: all var(--transition-normal);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
