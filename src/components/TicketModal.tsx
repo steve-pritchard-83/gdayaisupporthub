@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, MessageSquare, Edit3, Save, Calendar, User, Mail, AlertTriangle, Lightbulb, Bug, Trash2 } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
-import { ticketApi } from '../utils/api';
+import { ticketApi } from '../utils/localStorage';
 import type { Ticket, TicketStatus, Comment } from '../types';
 
 // Utility function to normalize ticket data from API

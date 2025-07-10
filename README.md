@@ -2,178 +2,132 @@
 
 A simple, elegant support ticketing system with knowledge base - built for **vibe coding** and rapid prototyping.
 
-## 🚀 **Features**
+## 🚀 Live Demo
 
-- **Support Tickets**: Create, manage, and track support requests
-- **Knowledge Base**: Searchable articles and documentation
-- **Admin Panel**: Manage tickets and view archived items
-- **Real-time Updates**: Live ticket status updates
-- **Responsive Design**: Works on mobile and desktop
-- **Zero Database Setup**: Uses JSON files for storage
+Visit the live demo at: **https://steve-pritchard-83.github.io/gdayaisupporthub/**
 
-## 🛠️ **Technology Stack**
+## ✨ Features
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Backend**: Express.js + Node.js
-- **Storage**: JSON files (perfect for prototyping)
-- **Styling**: CSS modules
+- **Support Tickets**: Create, manage, and track support tickets
+- **Knowledge Base**: Browse helpful articles and documentation
+- **Admin Panel**: Manage tickets and articles (admin authentication)
+- **Local Storage**: All data persists in your browser's local storage
+- **Responsive Design**: Works great on desktop and mobile
+- **Real-time Updates**: Local state management with instant updates
+
+## 🛠 Tech Stack
+
+- **Frontend**: React + TypeScript + Vite
+- **Styling**: CSS with modern design
 - **Icons**: Lucide React
-- **Deployment**: Vercel (or any platform)
+- **Storage**: Browser localStorage (perfect for demos and prototypes)
+- **Deployment**: GitHub Pages
 
-## 📦 **Quick Start**
+## 🏃‍♂️ Getting Started
 
-### Development
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Installation
+
+1. Clone the repository:
 ```bash
-# Install dependencies
+git clone https://github.com/steve-pritchard-83/gdayaisupporthub.git
+cd gdayaisupporthub
+```
+
+2. Install dependencies:
+```bash
 npm install
-
-# Start development servers
-npm run dev          # Frontend (localhost:5173)
-npm run server:dev   # Backend (localhost:3001)
 ```
 
-### Production
+3. Start the development server:
 ```bash
-# Build for production
-npm run build
-
-# Start production server
-npm run server
+npm run dev
 ```
 
-## 🗂️ **JSON File Storage**
+4. Open your browser to `http://localhost:5173`
 
-The system uses simple JSON files for data storage:
+## 🚀 Deployment
 
-- `data/tickets.json` - Support tickets
-- `data/articles.json` - Knowledge base articles  
-- `data/comments.json` - Ticket comments
+The project is configured for automatic deployment to GitHub Pages:
 
-Perfect for:
-- ✅ Rapid prototyping
-- ✅ Zero setup complexity
-- ✅ Version control friendly
-- ✅ Easy to backup/restore
-- ✅ No database dependencies
+1. **Automatic**: Push to main branch triggers GitHub Actions workflow
+2. **Manual**: Run `npm run deploy` to deploy manually
 
-## 🌐 **API Endpoints**
+## 🎯 Usage
 
-### Tickets
-- `GET /api/tickets` - Get all tickets
-- `POST /api/tickets` - Create new ticket
-- `GET /api/tickets/:id` - Get ticket with comments
-- `PUT /api/tickets/:id` - Update ticket
-- `POST /api/tickets/:id/comments` - Add comment
-- `PATCH /api/tickets/:id/archive` - Archive ticket
-- `PATCH /api/tickets/:id/restore` - Restore ticket
-- `DELETE /api/tickets/:id/permanent` - Delete permanently
+### For Users
+- **Submit Tickets**: Fill out the ticket form with your issue details
+- **Browse Knowledge Base**: Search for helpful articles and guides
+- **Track Progress**: View ticket status and comments
 
-### Knowledge Base
-- `GET /api/articles` - Get all articles
-- `POST /api/articles/:id/view` - Increment view count
+### For Admins
+- **Access Admin Panel**: Use the admin selector to switch to admin mode
+- **Manage Tickets**: Update status, add comments, archive tickets
+- **Manage Articles**: Create, edit, and delete knowledge base articles
 
-### System
-- `GET /api/health` - Health check
+## 📦 Data Storage
 
-## 🎨 **Default Content**
+This project uses **localStorage** for data persistence:
+- Perfect for prototypes and demos
+- Data persists between browser sessions
+- No server or database required
+- Easy to reset by clearing browser data
 
-The system comes with sample content:
+## 🔧 Development
 
-**Sample Tickets:**
-- Welcome message
-- Feature requests
-- Bug reports
+### Available Scripts
 
-**Knowledge Articles:**
-- Getting Started Guide
-- Advanced Tips
-- Troubleshooting
-- Security & Privacy
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run deploy` - Deploy to GitHub Pages
+- `npm run lint` - Run ESLint
 
-## 🚀 **Deployment**
-
-### Vercel (Recommended)
-```bash
-# Deploy to Vercel
-npm install -g vercel
-vercel
-```
-
-### Manual Server
-```bash
-# Any Node.js hosting
-npm run build
-npm run server
-```
-
-## 🔧 **Configuration**
-
-### Environment Variables
-```env
-NODE_ENV=production
-PORT=3001
-VITE_API_URL=https://your-domain.com
-```
-
-### CORS Configuration
-Update `server/index.js` for your domain:
-```javascript
-const corsOptions = {
-  origin: ['https://your-domain.com'],
-  // ... other options
-};
-```
-
-## 📁 **Project Structure**
+### Project Structure
 
 ```
-gdayai-support-hub/
-├── api/                    # Vercel serverless functions
-│   ├── tickets.js
-│   ├── articles.js
-│   └── health.js
-├── data/                   # JSON storage files
-│   ├── tickets.json
-│   ├── articles.json
-│   └── comments.json
-├── server/                 # Express server
-│   ├── index.js
-│   └── json-storage.js
-├── src/                    # React frontend
-│   ├── components/
-│   ├── pages/
-│   ├── utils/
-│   └── App.tsx
-└── public/                 # Static assets
+src/
+├── components/     # React components
+├── pages/         # Page components
+├── context/       # React Context providers
+├── utils/         # Utility functions
+├── types/         # TypeScript type definitions
+└── assets/        # Static assets
 ```
 
-## 🎯 **Use Cases**
+## 🎨 Customization
 
-Perfect for:
-- **Startups**: Quick support system setup
-- **Prototyping**: Validate ideas fast
-- **Small Teams**: Under 100 users
-- **MVPs**: Minimum viable product
-- **Learning**: Study full-stack development
+This project is designed for **vibe coding** - easy customization and rapid iteration:
 
-## 🤝 **Contributing**
+- **Colors**: Update CSS variables in `src/index.css`
+- **Components**: All components are in `src/components/`
+- **Data**: Modify default data in `src/utils/localStorage.ts`
+- **Styling**: Simple CSS files next to components
+
+## 🤝 Contributing
+
+This is a prototyping project, but contributions are welcome:
 
 1. Fork the repository
-2. Create feature branch
-3. Make changes
-4. Test locally
-5. Submit pull request
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-## 📄 **License**
+## 📝 License
 
-MIT License - feel free to use for any purpose!
+This project is open source and available under the [MIT License](LICENSE).
 
-## 🆘 **Support**
+## 🙏 Acknowledgments
 
-- **Issues**: GitHub Issues
-- **Docs**: This README
-- **Health Check**: `/api/health`
+- Built with React and TypeScript
+- Icons by Lucide
+- Deployed on GitHub Pages
+- Perfect for vibe coding and rapid prototyping!
 
 ---
 
-**Built with 💙 for rapid prototyping and vibe coding**
+**Happy coding!** 🎉

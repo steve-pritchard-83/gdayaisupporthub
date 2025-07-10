@@ -3,28 +3,29 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://steve-pritchard-83.github.io/gdayaisupporthub",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:analyze": "npm run build && npx vite-bundle-analyzer dist",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "npm run lint -- --fix",
+    "type-check": "tsc --noEmit",
     "preview": "vite preview",
-    "server": "node server/index.js",
-    "server:dev": "nodemon server/index.js"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "clean": "rm -rf dist node_modules/.cache",
+    "reset": "npm run clean && npm install",
+    "check": "npm run type-check && npm run lint"
   },
   "dependencies": {
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
     "lucide-react": "^0.263.1",
-    "node-fetch": "^3.3.2",
-    "nodemon": "^3.1.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
-    "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1",
     "typescript": "^5.0.0",
     "uuid": "^9.0.1",
     "vite": "^4.4.5"
@@ -36,6 +37,7 @@
     "eslint": "^9.29.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "gh-pages": "^6.1.1",
     "globals": "^16.2.0",
     "typescript-eslint": "^8.34.1"
   }

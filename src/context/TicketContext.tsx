@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Ticket, Comment, KnowledgeArticle, AdminUser } from '../types';
-import { ticketApi, articleApi } from '../utils/api';
+import { ticketApi, articleApi } from '../utils/localStorage';
 // import { io, Socket } from 'socket.io-client'; // Disabled for Vercel deployment
 
 interface TicketState {

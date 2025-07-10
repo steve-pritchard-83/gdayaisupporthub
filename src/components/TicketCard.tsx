@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, User, MessageSquare, Bug, Lightbulb } from 'lucide-react';
 import type { Ticket } from '../types';
+import { CSS_CLASSES } from '../utils/constants';
 
 interface TicketCardProps {
   ticket: Ticket;
@@ -27,17 +28,15 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
   };
 
   const getStatusClass = (status: string) => {
-    switch (status) {
-      case 'pending': return 'tag-pending';
-      case 'in-progress': return 'tag-in-progress';
-      case 'completed': return 'tag-completed';
-      case 'closed': return 'tag-closed';
-      default: return 'tag-pending';
-    }
+    return CSS_CLASSES.status[status as keyof typeof CSS_CLASSES.status] || CSS_CLASSES.status.pending;
   };
 
   const getTypeIcon = (type: string) => {
     return type === 'bug' ? <Bug size={16} /> : <Lightbulb size={16} />;
+  };
+
+  const getTypeClass = (type: string) => {
+    return CSS_CLASSES.type[type as keyof typeof CSS_CLASSES.type] || CSS_CLASSES.type.bug;
   };
 
   return (
@@ -50,7 +49,7 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, onClick }) => {
           <div className={`type-icon ${ticket.type}`}>
             {getTypeIcon(ticket.type)}
           </div>
-          <span className={`tag tag-${ticket.type}`}>
+          <span className={`tag ${getTypeClass(ticket.type)}`}>
             {ticket.type}
           </span>
           <span className={`tag ${getStatusClass(ticket.status)}`}>
