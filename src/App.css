@@ -83,6 +83,10 @@
   --font-size-3xl: 1.875rem;
   --font-size-4xl: 2.25rem;
   
+  /* 🎨 Typography System - Segoe UI Brand Font */
+  --font-family-primary: 'Segoe UI', 'Segoe UI Historic', 'Segoe UI Emoji', 'Segoe UI Symbol', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'Segoe UI Mono', 'Cascadia Code', 'Courier New', monospace;
+  
   /* ⚡ Animation Easing */
   --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -115,9 +119,7 @@ html, body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-family-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--surface-secondary);
@@ -127,6 +129,21 @@ body {
   /* Override default Vite CSS */
   display: block !important;
   place-items: unset !important;
+}
+
+/* 🎨 Ensure all elements use consistent Segoe UI font family */
+* {
+  font-family: inherit;
+}
+
+/* 🎨 Specific elements that need consistent font */
+button,
+input,
+textarea,
+select,
+optgroup,
+option {
+  font-family: var(--font-family-primary);
 }
 
 /* Mobile-specific body padding to account for taller header */

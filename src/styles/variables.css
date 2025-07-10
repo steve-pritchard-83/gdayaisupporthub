@@ -56,8 +56,8 @@
   --spacing-3xl: 4rem;      /* 64px */
   
   /* === TYPOGRAPHY === */
-  --font-family-primary: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --font-family-mono: 'Fira Code', Consolas, 'Courier New', monospace;
+  --font-family-primary: 'Segoe UI', 'Segoe UI Historic', 'Segoe UI Emoji', 'Segoe UI Symbol', system-ui, -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'Segoe UI Mono', 'Cascadia Code', 'Courier New', monospace;
   
   --font-size-xs: 0.75rem;   /* 12px */
   --font-size-sm: 0.875rem;  /* 14px */
