@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Bug, Lightbulb, Archive, List, BookOpen } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
 import TicketCard from '../components/TicketCard';
@@ -22,11 +22,12 @@ const Home: React.FC = () => {
   const [archivedTickets, setArchivedTickets] = useState<Ticket[]>([]);
   const [includeArchived, setIncludeArchived] = useState(false);
   const [isLoadingArchived, setIsLoadingArchived] = useState(false);
+  const [hasLoadedArchived, setHasLoadedArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Load archived tickets when user wants to see all tickets with archived ones
   useEffect(() => {
-    if (viewMode === 'allTickets' && includeArchived && archivedTickets.length === 0) {
+    if (viewMode === 'allTickets' && includeArchived && !hasLoadedArchived) {
       setIsLoadingArchived(true);
       ticketApi.getArchived()
         .then(tickets => {
@@ -38,6 +39,7 @@ const Home: React.FC = () => {
             updatedAt: ticket.updatedAt || ticket.updated_at,
             comments: ticket.comments || []
           })));
+          setHasLoadedArchived(true);
         })
         .catch(error => {
           console.error('Failed to load archived tickets:', error);
@@ -46,52 +48,55 @@ const Home: React.FC = () => {
           setIsLoadingArchived(false);
         });
     }
-  }, [viewMode, includeArchived, archivedTickets.length]);
+  }, [viewMode, includeArchived, hasLoadedArchived]);
 
   // Get all tickets (active + archived if requested)
-  const getAllTickets = () => {
+  const getAllTickets = useCallback(() => {
     let allTickets = [...state.tickets];
     if (includeArchived) {
       allTickets = [...allTickets, ...archivedTickets];
     }
     return allTickets;
-  };
+  }, [state.tickets, includeArchived, archivedTickets]);
 
   // Filter tickets based on search and type
-  const filteredTickets = (viewMode === 'recent' ? state.tickets : getAllTickets())
-    .filter(ticket => {
+  const filteredTickets = useMemo(() => {
+    const baseTickets = viewMode === 'recent' ? state.tickets : getAllTickets();
+    return baseTickets.filter(ticket => {
       // Type filter
       if (filter !== 'all' && ticket.type !== filter) return false;
       return true;
     });
+  }, [viewMode, state.tickets, getAllTickets, filter]);
 
   // Apply search if query exists
-  const searchedTickets = searchQuery ? 
-    searchTickets(filteredTickets, searchQuery) : 
-    filteredTickets;
+  const searchedTickets = useMemo(() => {
+    return searchQuery ? 
+      searchTickets(filteredTickets, searchQuery) : 
+      filteredTickets;
+  }, [filteredTickets, searchQuery]);
 
   // Get tickets based on view mode
-  const displayTickets = viewMode === 'recent' 
-    ? searchedTickets
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 6)
-    : searchedTickets
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const displayTickets = useMemo(() => {
+    const sorted = searchedTickets.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return viewMode === 'recent' ? sorted.slice(0, 6) : sorted;
+  }, [searchedTickets, viewMode]);
 
-  const handleTicketClick = (ticket: Ticket) => {
+  const handleTicketClick = useCallback((ticket: Ticket) => {
     setSelectedTicket(ticket);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setSelectedTicket(null);
-  };
+  }, []);
 
-  const handleViewModeChange = (mode: 'recent' | 'allTickets') => {
+  const handleViewModeChange = useCallback((mode: 'recent' | 'allTickets') => {
     setViewMode(mode);
     if (mode === 'recent') {
       setIncludeArchived(false);
+      setHasLoadedArchived(false); // Reset flag when switching back to recent
     }
-  };
+  }, []);
 
   if (state.loading) {
     return (
