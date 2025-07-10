@@ -9,4 +9,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
+  // Ensure production builds use the correct base path
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  },
 })
