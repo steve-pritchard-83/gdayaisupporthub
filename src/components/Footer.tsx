@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ExternalLink, Mail, Globe } from 'lucide-react';
 import './Footer.css';
 
@@ -37,9 +38,9 @@ const Footer: React.FC = () => {
           <div className="footer-section">
             <h3>Quick Links</h3>
             <ul className="footer-links">
-              <li><a href="/">Home</a></li>
-              <li><a href="/knowledge">Knowledge Hub</a></li>
-              <li><a href="/admin">Admin Panel</a></li>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/knowledge">Knowledge Hub</Link></li>
+              <li><Link to="/admin">Admin Panel</Link></li>
               <li>
                 <a href="https://gdayai.gdaygroup.com.au/" target="_blank" rel="noopener noreferrer">
                   <ExternalLink size={14} />

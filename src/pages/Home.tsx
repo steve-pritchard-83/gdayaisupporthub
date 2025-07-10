@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Bug, Lightbulb, Archive, List, BookOpen } from 'lucide-react';
 import { useTickets } from '../context/TicketContext';
 import TicketCard from '../components/TicketCard';
@@ -166,13 +167,13 @@ const Home: React.FC = () => {
             <Plus size={20} />
             Submit Ticket
           </button>
-          <a 
-            href="/knowledge" 
+          <Link 
+            to="/knowledge" 
             className="btn btn-secondary"
           >
             <BookOpen size={20} />
             Visit the Knowledge Hub
-          </a>
+          </Link>
           <a 
             href="https://gdayai.gdaygroup.com.au/" 
             target="_blank" 
