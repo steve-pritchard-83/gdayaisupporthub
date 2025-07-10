@@ -7,6 +7,34 @@
   z-index: 100;
   width: 100%;
   min-width: 100%;
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Enhanced sticky header when scrolled */
+.header.scrolled {
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-xl);
+  border-bottom-color: rgba(255, 221, 0, 0.8);
+}
+
+/* Smooth header content transitions */
+.header.scrolled .header-content {
+  padding: 0.75rem 0;
+  transition: padding var(--transition-normal);
+}
+
+.header.scrolled .logo-text {
+  font-size: 1.25rem;
+  transition: font-size var(--transition-normal);
+}
+
+.header.scrolled .header-title {
+  font-size: 1.25rem;
+  transition: font-size var(--transition-normal);
 }
 
 .header-content {

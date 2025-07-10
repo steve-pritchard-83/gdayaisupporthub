@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTickets } from '../context/TicketContext';
 import AdminAuthModal from './AdminAuthModal';
@@ -9,8 +9,22 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useTickets();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Enhanced sticky header with scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      if (headerRef.current) {
+        const scrolled = window.scrollY > 20;
+        headerRef.current.classList.toggle('scrolled', scrolled);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleAdminClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,7 +43,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="header">
+    <header className="header" ref={headerRef}>
       <div className="container">
         <div className="header-content">
           <Link to="/" className="logo">
