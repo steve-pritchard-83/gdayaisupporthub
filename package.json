@@ -13,8 +13,8 @@
     "type-check": "tsc --noEmit",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
-    "clean": "rm -rf dist node_modules/.cache",
+    "deploy": "git add docs && git commit -m \"Deploy to GitHub Pages\" && git push",
+    "clean": "rm -rf docs node_modules/.cache",
     "reset": "npm run clean && npm install",
     "check": "npm run type-check && npm run lint"
   },

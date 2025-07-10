@@ -7,7 +7,7 @@ export default defineConfig({
   // Use root path for local development, GitHub Pages path for production
   base: process.env.NODE_ENV === 'production' ? '/gdayaisupporthub/' : '/',
   build: {
-    outDir: 'dist',
+    outDir: 'docs',
   },
   // Ensure production builds use the correct base path
   define: {
