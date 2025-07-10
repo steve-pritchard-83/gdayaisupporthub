@@ -1,5 +1,5 @@
 .header {
-  background-color: var(--text-dark);
+  background-color: var(--text-primary);
   border-bottom: 2px solid var(--primary-yellow);
   box-shadow: var(--shadow-lg);
   position: sticky;
@@ -22,7 +22,7 @@
   align-items: center;
   text-decoration: none;
   gap: 0.75rem;
-  transition: var(--transition);
+  transition: var(--transition-normal);
 }
 
 .logo:hover {
@@ -37,14 +37,14 @@
 .logo-text {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary-white);
+  color: var(--text-inverse);
   margin: 0;
 }
 
 .header-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary-white);
+  color: var(--text-inverse);
   margin: 0;
   text-align: center;
   justify-self: center;
@@ -62,30 +62,30 @@
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  color: var(--primary-white);
+  color: var(--text-inverse);
   font-weight: 500;
   padding: 0.5rem 1rem;
-  border-radius: var(--border-radius);
-  transition: var(--transition);
+  border-radius: var(--radius-md);
+  transition: var(--transition-normal);
   position: relative;
   opacity: 0.9;
 }
 
 .nav-link:hover {
-  color: var(--text-dark);
+  color: var(--text-primary);
   background-color: var(--primary-yellow);
   opacity: 1;
 }
 
 .nav-link.active {
-  color: var(--text-dark);
+  color: var(--text-primary);
   background-color: var(--primary-yellow);
   font-weight: 600;
   opacity: 1;
 }
 
 .nav-link.active:hover {
-  background-color: #e6c400;
+  background-color: var(--primary-yellow-dark);
 }
 
 .nav-link[type="button"] {
@@ -98,7 +98,7 @@
 
 .badge {
   background-color: #dc3545;
-  color: white;
+  color: var(--text-inverse);
   font-size: 0.75rem;
   font-weight: 600;
   padding: 0.25rem 0.5rem;

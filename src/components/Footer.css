@@ -1,6 +1,6 @@
 .footer {
-  background-color: var(--text-dark);
-  color: var(--primary-white);
+  background-color: var(--text-primary);
+  color: var(--text-inverse);
   padding: 3rem 0 1rem 0;
   margin-top: auto;
   width: 100%;
@@ -35,7 +35,7 @@
 
 .footer-description,
 .footer-about {
-  color: var(--medium-grey);
+  color: var(--text-tertiary);
   line-height: 1.6;
   margin: 0;
   font-size: 0.9rem;
@@ -52,13 +52,13 @@
 }
 
 .footer-links a {
-  color: var(--medium-grey);
+  color: var(--text-tertiary);
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  transition: var(--transition);
+  transition: var(--transition-normal);
 }
 
 .footer-links a:hover {
@@ -74,17 +74,17 @@
 }
 
 .tech-badge {
-  background-color: var(--dark-grey);
-  color: var(--primary-white);
+  background-color: var(--border-strong);
+  color: var(--text-inverse);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 500;
-  border: 1px solid var(--medium-grey);
+  border: 1px solid var(--border-medium);
 }
 
 .footer-bottom {
-  border-top: 1px solid var(--dark-grey);
+  border-top: 1px solid var(--border-strong);
   padding-top: 2rem;
   display: flex;
   justify-content: space-between;
@@ -96,7 +96,7 @@
 .footer-copyright p,
 .footer-version p {
   margin: 0;
-  color: var(--medium-grey);
+  color: var(--text-tertiary);
   font-size: 0.875rem;
 }
 
