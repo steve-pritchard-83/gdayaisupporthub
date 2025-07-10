@@ -49,7 +49,7 @@ interface TicketProviderProps {
 
 
 
-export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
+const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
   const [state, setState] = useState<TicketState>(initialState);
   // const [socket, setSocket] = useState<Socket | null>(null); // Disabled for Vercel
 
@@ -131,7 +131,11 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     try {
       const rawTickets = await ticketApi.getAll();
       const tickets = rawTickets.map(normalizeTicket);
-      setState(prev => ({ ...prev, tickets, loading: false }));
+      setState(prev => ({ 
+        ...prev, 
+        tickets, 
+        loading: false 
+      }));
     } catch (error) {
       setState(prev => ({ 
         ...prev, 

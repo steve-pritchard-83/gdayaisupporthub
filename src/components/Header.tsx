@@ -2,7 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTickets } from '../context/TicketContext';
 import AdminAuthModal from './AdminAuthModal';
+// import DemoModeToggle from './DemoModeToggle';
+// import type { DemoNotification } from '../utils/demoService';
 import './Header.css';
+
+// interface HeaderProps {
+//   onNotification?: (notification: DemoNotification) => void;
+// }
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -41,6 +47,17 @@ const Header: React.FC = () => {
     // Authentication successful, navigate to admin panel
     navigate('/admin');
   };
+
+  // Demo mode handlers (commented out for now)
+  // const handleDemoModeChange = (enabled: boolean) => {
+  //   console.log('Demo mode', enabled ? 'enabled' : 'disabled');
+  // };
+
+  // const handleNotification = (notification: DemoNotification) => {
+  //   if (onNotification) {
+  //     onNotification(notification);
+  //   }
+  // };
 
   return (
     <header className="header" ref={headerRef}>
@@ -94,6 +111,12 @@ const Header: React.FC = () => {
               )}
             </button>
           </nav>
+          
+          {/* Demo mode toggle (hidden for now) */}
+          {/* <DemoModeToggle 
+            onDemoModeChange={handleDemoModeChange}
+            onNotification={handleNotification}
+          /> */}
         </div>
       </div>
       

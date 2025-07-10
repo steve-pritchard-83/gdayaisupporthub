@@ -7,9 +7,24 @@ import AdminPanel from './pages/AdminPanel';
 import KnowledgeHub from './pages/KnowledgeHub';
 import TicketProvider from './context/TicketContext';
 import ErrorBoundary from './components/ErrorBoundary';
+// Demo mode imports (commented out for now)
+// import React, { useState, useCallback } from 'react';
+// import { ToastContainer } from './components/ToastNotification';
+// import type { DemoNotification } from './utils/demoService';
 import './App.css';
 
 function App() {
+  // Demo mode state (commented out for now)
+  // const [notifications, setNotifications] = useState<DemoNotification[]>([]);
+
+  // const addNotification = useCallback((notification: DemoNotification) => {
+  //   setNotifications(prev => [...prev, notification]);
+  // }, []);
+
+  // const removeNotification = useCallback((id: string) => {
+  //   setNotifications(prev => prev.filter(n => n.id !== id));
+  // }, []);
+
   return (
     <ErrorBoundary>
       <TicketProvider>
@@ -26,6 +41,11 @@ function App() {
               </ErrorBoundary>
             </main>
             <Footer />
+            {/* Demo mode notifications (commented out for now) */}
+            {/* <ToastContainer 
+              notifications={notifications} 
+              onDismiss={removeNotification} 
+            /> */}
           </div>
         </Router>
       </TicketProvider>

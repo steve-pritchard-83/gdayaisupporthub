@@ -16,6 +16,7 @@ import { TICKET_CONFIG, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../utils/consta
 
 const Home: React.FC = () => {
   const { state } = useTickets();
+
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<'all' | typeof TICKET_CONFIG.types[number]>('all');
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
