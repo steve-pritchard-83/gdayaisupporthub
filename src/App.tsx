@@ -13,7 +13,7 @@ function App() {
   return (
     <ErrorBoundary>
       <TicketProvider>
-        <Router>
+        <Router basename={import.meta.env.PROD ? '/gdayaisupporthub' : ''}>
           <div className="App">
             <Header />
             <main className="main-content">
