@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { Ticket, Comment, KnowledgeArticle, AdminUser } from '../types';
 import { ticketApi, articleApi } from '../utils/localStorage';
@@ -152,7 +152,7 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
     loadArticles();
   }, []);
 
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const rawTickets = await ticketApi.getAll();
@@ -165,9 +165,9 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
         error: 'Failed to load tickets'
       }));
     }
-  };
+  }, []);
 
-  const loadArticles = async () => {
+  const loadArticles = useCallback(async () => {
     try {
       const articles = await articleApi.getAll();
       setState(prev => ({ ...prev, articles }));
@@ -177,9 +177,9 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
         error: 'Failed to load articles'
       }));
     }
-  };
+  }, []);
 
-  const createTicket = async (ticketData: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt' | 'comments'>) => {
+  const createTicket = useCallback(async (ticketData: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt' | 'comments'>) => {
     try {
       const newTicket = await ticketApi.create({
         title: ticketData.title,
@@ -203,7 +203,7 @@ export const TicketProvider: React.FC<TicketProviderProps> = ({ children }) => {
       }));
       throw error;
     }
-  };
+  }, []);
 
   const updateTicket = async (id: string, updates: Partial<Ticket>) => {
     try {
