@@ -87,6 +87,9 @@
   --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* 📏 Layout Dimensions */
+  --header-height: 100px;     /* Fixed header height */
 }
 
 * {
@@ -119,7 +122,7 @@ body {
   background-color: var(--surface-secondary);
   color: var(--text-primary);
   line-height: 1.6;
-  padding-top: 100px; /* Compensate for fixed header */
+  padding-top: var(--header-height); /* Compensate for fixed header */
   /* Override default Vite CSS */
   display: block !important;
   place-items: unset !important;
@@ -1130,7 +1133,7 @@ p {
 /* Modal overlay */
 .modal-overlay {
   position: fixed;
-  top: 0;
+  top: var(--header-height); /* Account for fixed header height */
   left: 0;
   right: 0;
   bottom: 0;
