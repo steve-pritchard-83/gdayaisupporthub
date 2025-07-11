@@ -301,9 +301,9 @@ option {
   }
 }
 
-/* Container - Optimized for Ultra Wide and Large Monitors (30% tighter) */
+/* Container - Optimized for Better Desktop Usage */
 .container {
-  max-width: 700px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
   width: 100%;
@@ -312,7 +312,7 @@ option {
 /* Ultra Wide Monitors (3440px+) */
 @media (min-width: 3440px) {
   .container {
-    max-width: 1680px;
+    max-width: 2400px;
     padding: 0 3rem;
   }
 }
@@ -320,7 +320,7 @@ option {
 /* Large Monitors (2560px+) */
 @media (min-width: 2560px) and (max-width: 3439px) {
   .container {
-    max-width: 1260px;
+    max-width: 1800px;
     padding: 0 3rem;
   }
 }
@@ -328,7 +328,7 @@ option {
 /* Standard Large Monitors (1920px+) */
 @media (min-width: 1920px) and (max-width: 2559px) {
   .container {
-    max-width: 980px;
+    max-width: 1400px;
     padding: 0 2rem;
   }
 }
@@ -336,7 +336,7 @@ option {
 /* Large Desktops (1440px+) */
 @media (min-width: 1440px) and (max-width: 1919px) {
   .container {
-    max-width: 840px;
+    max-width: 1200px;
     padding: 0 2rem;
   }
 }
@@ -344,7 +344,7 @@ option {
 /* Standard Desktops (1200px+) */
 @media (min-width: 1200px) and (max-width: 1439px) {
   .container {
-    max-width: 700px;
+    max-width: 1000px;
     padding: 0 1.5rem;
   }
 }
@@ -352,21 +352,21 @@ option {
 /* Medium screens */
 @media (max-width: 1199px) {
   .container {
-    max-width: 630px;
+    max-width: 900px;
     padding: 0 1.5rem;
   }
 }
 
 @media (max-width: 992px) {
   .container {
-    max-width: 525px;
+    max-width: 750px;
     padding: 0 1rem;
   }
 }
 
 @media (max-width: 768px) {
   .container {
-    max-width: 380px;
+    max-width: 500px;
     padding: 0 0.75rem;
   }
 }
@@ -3323,4 +3323,241 @@ p {
 
 .card-interactive:active {
   transform: translateY(-2px) scale(1.005);
+}
+
+/* ======================================
+   MARKDOWN CONTENT STYLING
+   ====================================== */
+
+/* Article Body Container */
+.article-body {
+  padding: 2rem 0;
+  line-height: 1.7;
+  color: var(--text-primary);
+  max-width: none;
+}
+
+/* Headings */
+.article-h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem 0;
+  color: var(--text-primary);
+  line-height: 1.2;
+  border-bottom: 3px solid var(--primary-yellow);
+  padding-bottom: 0.5rem;
+}
+
+.article-h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 1.8rem 0 1rem 0;
+  color: var(--text-primary);
+  line-height: 1.3;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 0.3rem;
+}
+
+.article-h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.8rem 0;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.article-h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.2rem 0 0.6rem 0;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Paragraphs */
+.article-p {
+  margin: 1rem 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* Lists */
+.article-ul, .article-ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+  color: var(--text-secondary);
+}
+
+.article-li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.article-ul .article-li {
+  list-style-type: disc;
+}
+
+.article-ol .article-li {
+  list-style-type: decimal;
+}
+
+/* Nested lists */
+.article-ul .article-ul, .article-ol .article-ol {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.article-ul .article-ul .article-li {
+  list-style-type: circle;
+}
+
+.article-ul .article-ul .article-ul .article-li {
+  list-style-type: square;
+}
+
+/* Code */
+.article-code-inline {
+  background-color: var(--surface-secondary);
+  color: var(--accent-purple);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  border: 1px solid var(--border-light);
+}
+
+.article-pre {
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.article-code-block {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  color: var(--text-primary);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Blockquotes */
+.article-blockquote {
+  border-left: 4px solid var(--primary-yellow);
+  background-color: var(--surface-secondary);
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.article-blockquote .article-p {
+  margin: 0.5rem 0;
+}
+
+/* Tables */
+.article-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  background-color: var(--surface-primary);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+}
+
+.article-th {
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+}
+
+.article-th:last-child {
+  border-right: none;
+}
+
+.article-td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+.article-td:last-child {
+  border-right: none;
+}
+
+.article-table tr:last-child .article-td {
+  border-bottom: none;
+}
+
+.article-table tr:hover {
+  background-color: var(--surface-secondary);
+}
+
+/* Emphasis */
+.article-strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.article-em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .article-body {
+    padding: 1rem 0;
+  }
+  
+  .article-h1 {
+    font-size: 2rem;
+    margin: 1.5rem 0 0.8rem 0;
+  }
+  
+  .article-h2 {
+    font-size: 1.5rem;
+    margin: 1.2rem 0 0.6rem 0;
+  }
+  
+  .article-h3 {
+    font-size: 1.25rem;
+    margin: 1rem 0 0.5rem 0;
+  }
+  
+  .article-ul, .article-ol {
+    padding-left: 1.5rem;
+  }
+  
+  .article-pre {
+    padding: 1rem;
+    font-size: 0.85em;
+  }
+  
+  .article-table {
+    font-size: 0.9em;
+  }
+  
+  .article-th, .article-td {
+    padding: 0.5rem;
+  }
+  
+  .article-blockquote {
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+  }
 }

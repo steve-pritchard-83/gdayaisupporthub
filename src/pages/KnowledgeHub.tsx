@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Search, BookOpen, Eye, Calendar, Tag } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useTickets } from '../context/TicketContext';
 import type { KnowledgeArticle } from '../types';
 
@@ -75,7 +77,34 @@ const KnowledgeHub: React.FC = () => {
             </header>
             
             <div className="article-body">
-              <p>{selectedArticle.content}</p>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  h1: ({children}) => <h1 className="article-h1">{children}</h1>,
+                  h2: ({children}) => <h2 className="article-h2">{children}</h2>,
+                  h3: ({children}) => <h3 className="article-h3">{children}</h3>,
+                  h4: ({children}) => <h4 className="article-h4">{children}</h4>,
+                  ul: ({children}) => <ul className="article-ul">{children}</ul>,
+                  ol: ({children}) => <ol className="article-ol">{children}</ol>,
+                  li: ({children}) => <li className="article-li">{children}</li>,
+                  p: ({children}) => <p className="article-p">{children}</p>,
+                  code: ({children, className}) => {
+                    const isInline = !className;
+                    return isInline 
+                      ? <code className="article-code-inline">{children}</code>
+                      : <code className="article-code-block">{children}</code>;
+                  },
+                  pre: ({children}) => <pre className="article-pre">{children}</pre>,
+                  blockquote: ({children}) => <blockquote className="article-blockquote">{children}</blockquote>,
+                  table: ({children}) => <table className="article-table">{children}</table>,
+                  th: ({children}) => <th className="article-th">{children}</th>,
+                  td: ({children}) => <td className="article-td">{children}</td>,
+                  strong: ({children}) => <strong className="article-strong">{children}</strong>,
+                  em: ({children}) => <em className="article-em">{children}</em>
+                }}
+              >
+                {selectedArticle.content}
+              </ReactMarkdown>
             </div>
           </article>
         </div>

@@ -219,16 +219,7 @@ const defaultArticles: StoredArticle[] = [
     updatedAt: "2025-01-15T11:45:33.194Z",
     views: 2134
   },
-  {
-    id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    title: "Setting Up Your Workspace",
-    content: "Optimize your G'day AI workspace for maximum productivity and collaboration.\n\n## Workspace Organization\n\n### Creating Folders\n1. Click 'New Folder' in the sidebar\n2. Name your folder (e.g., 'Marketing', 'Legal', 'HR')\n3. Drag conversations into appropriate folders\n4. Use color coding for quick identification\n\n### Conversation Management\n- **Naming Convention**: Use descriptive names like 'Q1 Budget Analysis' instead of 'New Chat'\n- **Tags**: Add relevant tags for easy searching\n- **Favorites**: Star important conversations for quick access\n- **Archive**: Move old conversations to archive to reduce clutter\n\n## Team Collaboration\n\n### Sharing Conversations\n1. Click the share icon in any conversation\n2. Choose sharing permissions (View/Edit/Comment)\n3. Send invite link to team members\n4. Monitor collaboration in real-time\n\n### Team Templates\nCreate standardized prompts for common tasks:\n- Monthly report analysis\n- Client proposal reviews\n- Marketing campaign brainstorming\n- Code review assistance\n\n## Customization Options\n\n### Interface Preferences\n- **Theme**: Choose between light, dark, or auto modes\n- **Font Size**: Adjust for better readability\n- **Layout**: Compact or spacious conversation view\n- **Sidebar**: Show/hide folder structure\n\n### Notification Settings\n- **Email Alerts**: Get notified of team activity\n- **Browser Notifications**: Real-time collaboration updates\n- **Daily Summary**: Receive daily usage reports\n\n## Productivity Tips\n\n### Keyboard Shortcuts\n- `Ctrl + N`: New conversation\n- `Ctrl + S`: Save conversation\n- `Ctrl + F`: Search conversations\n- `Ctrl + /`: Show all shortcuts\n\n### Quick Actions\n- Pin frequently used prompts\n- Create custom shortcuts for common tasks\n- Use voice input for hands-free operation\n- Set up automated workflows",
-    category: "Setup",
-    tags: ["workspace", "organization", "collaboration", "productivity"],
-    createdAt: "2025-01-10T08:15:22.456Z",
-    updatedAt: "2025-01-15T16:30:45.789Z",
-    views: 756
-  },
+
   {
     id: "b2c3d4e5-f6g7-8901-bcde-fg2345678901",
     title: "Security and Privacy Guide",
@@ -381,6 +372,78 @@ const defaultComments: StoredComment[] = [
     content: "We're designing a smooth migration process! Existing users will be able to:\n• Link their current account to SSO during first SSO login\n• Maintain all their ticket history and preferences\n• Keep the same email address as their account identifier\n\nWe'll provide detailed migration guides before rollout.",
     isAdminComment: true,
     createdAt: "2025-07-01T15:00:00.000Z"
+  },
+  {
+    id: "comment-mobile-app-1",
+    ticketId: "feat-005-mobile-app",
+    author: "Mobile Team Lead",
+    content: "Mobile app development is complex and resource-intensive. We're currently evaluating whether to build native apps or focus on Progressive Web App (PWA) functionality first. PWA would give us:\n• Offline capabilities\n• Push notifications\n• Home screen installation\n• Much faster development timeline\n\nWhat are your thoughts on PWA vs native apps?",
+    isAdminComment: true,
+    createdAt: "2025-07-04T15:30:00.000Z"
+  },
+  {
+    id: "comment-mobile-app-2",
+    ticketId: "feat-005-mobile-app",
+    author: "David Kumar",
+    content: "PWA sounds like a great starting point! As long as it has offline access and push notifications, that covers 90% of our mobile needs. Native apps can come later if needed.",
+    isAdminComment: false,
+    createdAt: "2025-07-04T16:00:00.000Z"
+  },
+  {
+    id: "comment-analytics-1",
+    ticketId: "feat-006-analytics-dashboard",
+    author: "Data Analytics Team",
+    content: "Analytics dashboard is in active development! We're building this using modern data visualization tools. Current progress:\n• Basic ticket metrics - ✅ Complete\n• Response time analytics - 🔄 In Progress\n• Knowledge base analytics - 📋 Planned\n• Custom report builder - 📋 Planned\n\nExpected beta release in 3-4 weeks.",
+    isAdminComment: true,
+    createdAt: "2025-07-03T12:00:00.000Z"
+  },
+  {
+    id: "comment-analytics-2",
+    ticketId: "feat-006-analytics-dashboard",
+    author: "Emma Wilson",
+    content: "This is exactly what we need! Will the custom report builder allow scheduling of automated reports via email?",
+    isAdminComment: false,
+    createdAt: "2025-07-03T12:30:00.000Z"
+  },
+  {
+    id: "comment-analytics-3",
+    ticketId: "feat-006-analytics-dashboard",
+    author: "Data Analytics Team",
+    content: "Yes! Scheduled reports are part of Phase 2. You'll be able to:\n• Schedule daily/weekly/monthly reports\n• Send to multiple recipients\n• Customize report content and format\n• Set up alerts for specific metrics\n\nWe're also planning integration with Slack and Microsoft Teams for notifications.",
+    isAdminComment: true,
+    createdAt: "2025-07-03T13:00:00.000Z"
+  },
+  {
+    id: "comment-ai-assistant-1",
+    ticketId: "feat-007-ai-assistant",
+    author: "AI/ML Team",
+    content: "AI assistant integration is a fascinating challenge! We're exploring several approaches:\n• Rule-based routing (immediate implementation)\n• ML-powered categorization (6-8 weeks)\n• Advanced NLP analysis (longer term)\n\nThe chatbot for common questions could be ready much sooner - maybe 2-3 weeks for a basic version.",
+    isAdminComment: true,
+    createdAt: "2025-07-02T17:00:00.000Z"
+  },
+  {
+    id: "comment-ai-assistant-2",
+    ticketId: "feat-007-ai-assistant",
+    author: "Ryan Foster",
+    content: "A basic chatbot would be incredibly valuable! Even if it just handles common questions like \"how do I reset my password\" or \"what are your business hours\", that would reduce our support load significantly.",
+    isAdminComment: false,
+    createdAt: "2025-07-02T17:30:00.000Z"
+  },
+  {
+    id: "comment-test-bug-1",
+    ticketId: "421f947d-e311-4e9a-a26c-f0f023c131bc",
+    author: "QA Team",
+    content: "Production verification completed successfully! All database connections are working properly. This ticket can be closed.",
+    isAdminComment: true,
+    createdAt: "2025-07-08T06:00:00.000Z"
+  },
+  {
+    id: "comment-test-bug-2",
+    ticketId: "421f947d-e311-4e9a-a26c-f0f023c131bc",
+    author: "System Admin",
+    content: "Confirmed - all systems are operational. Monitoring shows normal performance metrics across all endpoints.",
+    isAdminComment: true,
+    createdAt: "2025-07-08T06:15:00.000Z"
   }
 ];
 
@@ -424,7 +487,14 @@ export const ticketApi = {
   // Get all tickets
   getAll: async (): Promise<StoredTicket[]> => {
     const tickets = getFromStorage<StoredTicket[]>(TICKETS_KEY, []);
-    return tickets.filter(ticket => !ticket.archived);
+    const comments = getFromStorage<StoredComment[]>(COMMENTS_KEY, []);
+    
+    return tickets
+      .filter(ticket => !ticket.archived)
+      .map(ticket => ({
+        ...ticket,
+        comments: comments.filter(c => c.ticketId === ticket.id)
+      })) as StoredTicket[];
   },
   
   // Get single ticket with comments
