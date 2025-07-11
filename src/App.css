@@ -3561,3 +3561,228 @@ p {
     margin: 1rem 0;
   }
 }
+
+/* ======================================
+   ARTICLE EDITOR STYLING
+   ====================================== */
+
+/* Editor Header */
+.content-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.editor-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.view-mode-toggle {
+  display: flex;
+  gap: 0.25rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.view-mode-toggle .btn {
+  border-radius: 0;
+  border: none;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.view-mode-toggle .btn:first-child {
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+
+.view-mode-toggle .btn:last-child {
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+/* Formatting Toolbar */
+.formatting-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-light);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  flex-wrap: wrap;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-light);
+  margin: 0 0.25rem;
+}
+
+.toolbar-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.375rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-btn:hover {
+  background-color: var(--surface-primary);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Editor Layout */
+.editor-section {
+  margin-bottom: 1rem;
+}
+
+.editor-textarea {
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  border-top: none;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 300px;
+}
+
+/* Split View Layout */
+.modal-content.large .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-content.large {
+  max-width: 1200px;
+  width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.split-preview {
+  display: flex;
+  gap: 1rem;
+  min-height: 400px;
+}
+
+.split-preview .editor-section {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.split-preview .preview-section {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Preview Section */
+.preview-section {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: var(--surface-primary);
+}
+
+.preview-header {
+  background-color: var(--surface-secondary);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.preview-header h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preview-content {
+  padding: 1.5rem;
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.preview-placeholder {
+  color: var(--text-tertiary);
+  font-style: italic;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+/* Split View for Mobile */
+@media (max-width: 1024px) {
+  .split-preview {
+    flex-direction: column;
+  }
+  
+  .split-preview .editor-section,
+  .split-preview .preview-section {
+    flex: none;
+  }
+  
+  .preview-content {
+    max-height: 250px;
+  }
+}
+
+/* Mobile Toolbar */
+@media (max-width: 768px) {
+  .content-editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .view-mode-toggle .btn {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .formatting-toolbar {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .toolbar-separator {
+    display: none;
+  }
+  
+  .toolbar-group {
+    gap: 0.125rem;
+  }
+  
+  .toolbar-btn {
+    padding: 0.25rem;
+  }
+}
