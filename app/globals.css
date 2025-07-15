@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Custom focus styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-accent hover:bg-accent-dark text-grey-900 font-medium py-3 px-4 rounded-lg transition-colors focus-ring;
+}
+
+.btn-secondary {
+  @apply bg-grey-200 hover:bg-grey-300 text-grey-700 font-medium py-3 px-4 rounded-lg transition-colors focus-ring;
+}
+
+.btn-outline {
+  @apply border border-grey-300 hover:border-grey-400 text-grey-700 font-medium py-3 px-4 rounded-lg transition-colors focus-ring;
+}
+
+/* Custom card styles */
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-grey-200 p-6;
+}
+
+.card-hover {
+  @apply hover:shadow-md transition-shadow;
+}
+
+/* Status indicators - Consistent yellow branding */
+.status-open {
+  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.status-progress {
+  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.status-closed {
+  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
+}
+
+/* Priority indicators - Consistent yellow branding */
+.priority-low {
+  @apply bg-grey-100 text-grey-700 px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.priority-medium {
+  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
+}
+
+.priority-high {
+  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
+} 
