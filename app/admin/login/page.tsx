@@ -68,43 +68,43 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-grey-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-primary flex items-center justify-center px-4">
+      <div className="max-w-md w-full space-y-8 fade-in">
         {/* Header */}
         <div className="text-center">
           <Link
             href="/"
-            className="inline-flex items-center text-grey-600 hover:text-grey-900 mb-6"
+            className="inline-flex items-center text-secondary hover:text-primary mb-8 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Support Hub
           </Link>
           
-                                 <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-         <Shield className="w-8 h-8 text-white" />
-        </div>
+          <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <Shield className="w-10 h-10 text-black" />
+          </div>
           
-          <h1 className="text-3xl font-bold text-grey-900">Admin Login</h1>
-          <p className="text-grey-600 mt-2">
+          <h1 className="text-4xl font-bold text-primary mb-4">Admin Login</h1>
+          <p className="text-secondary text-lg">
             Sign in to access the admin dashboard
           </p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="card">
+        <form onSubmit={handleSubmit} className="card space-y-6">
           {/* Error Alert */}
           {error && (
-                                     <div className="bg-accent border border-accent-dark rounded-lg p-4 mb-6">
-          <div className="flex items-center">
-           <AlertCircle className="w-5 h-5 text-white mr-2" />
-           <span className="text-black">{error}</span>
-          </div>
-        </div>
+            <div className="alert-attention-dark">
+              <div className="flex items-center">
+                <AlertCircle className="w-5 h-5 text-accent mr-3" />
+                <span className="text-primary">{error}</span>
+              </div>
+            </div>
           )}
 
           {/* Email Field */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-grey-700">
+          <div className="space-y-3">
+            <label htmlFor="email" className="block text-sm font-medium text-secondary">
               Email Address
             </label>
             <input
@@ -112,7 +112,7 @@ export default function AdminLoginPage() {
               id="email"
               value={credentials.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className="w-full px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+              className="form-input"
               placeholder="Enter your email address"
               disabled={isLoading}
               required
@@ -120,8 +120,8 @@ export default function AdminLoginPage() {
           </div>
 
           {/* Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-grey-700">
+          <div className="space-y-3">
+            <label htmlFor="password" className="block text-sm font-medium text-secondary">
               Password
             </label>
             <div className="relative">
@@ -130,7 +130,7 @@ export default function AdminLoginPage() {
                 id="password"
                 value={credentials.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                className="w-full px-3 py-2 pr-10 border border-grey-300 rounded-lg focus-ring"
+                className="form-input pr-10"
                 placeholder="Enter your password"
                 disabled={isLoading}
                 required
@@ -141,9 +141,9 @@ export default function AdminLoginPage() {
                 className="absolute inset-y-0 right-0 pr-3 flex items-center"
               >
                 {showPassword ? (
-                  <EyeOff className="w-4 h-4 text-grey-400" />
+                  <EyeOff className="w-4 h-4 text-secondary" />
                 ) : (
-                  <Eye className="w-4 h-4 text-grey-400" />
+                  <Eye className="w-4 h-4 text-secondary" />
                 )}
               </button>
             </div>
@@ -157,7 +157,7 @@ export default function AdminLoginPage() {
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-grey-900 mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2"></div>
                 Signing in...
               </>
             ) : (
@@ -174,19 +174,19 @@ export default function AdminLoginPage() {
           <button
             type="button"
             onClick={fillTestCredentials}
-            className="text-sm text-grey-500 hover:text-grey-700 underline"
+            className="text-sm text-muted hover:text-secondary underline transition-colors"
           >
             🔧 Fill test credentials (dev helper)
           </button>
         </div>
 
         {/* Security Notice */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <div className="alert-attention-dark">
           <div className="flex items-start">
-            <AlertCircle className="w-5 h-5 text-amber-600 mr-2 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-accent mr-3 mt-0.5" />
             <div>
-              <h3 className="text-sm font-medium text-amber-800">Security Notice</h3>
-              <p className="text-sm text-amber-700 mt-1">
+              <h3 className="text-sm font-semibold text-primary">Security Notice</h3>
+              <p className="text-sm text-secondary mt-1">
                 This is a development environment with hardcoded credentials. 
                 In production, implement proper authentication and authorization.
               </p>

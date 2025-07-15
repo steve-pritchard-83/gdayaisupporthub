@@ -80,28 +80,20 @@ export default function AdminDashboardPage() {
     
     setTickets(updatedTickets);
     setSelectedTickets([]);
-    
-    // Refresh analytics
-    const analyticsData = calculateAdminAnalytics();
-    setAnalytics(analyticsData);
   };
 
   const handleBulkDelete = () => {
     if (selectedTickets.length === 0) return;
     
-    if (window.confirm(`Are you sure you want to delete ${selectedTickets.length} ticket(s)?`)) {
-      selectedTickets.forEach(ticketId => {
-        deleteTicket(ticketId);
-      });
-      
-      const updatedTickets = tickets.filter(ticket => !selectedTickets.includes(ticket.id));
-      setTickets(updatedTickets);
-      setSelectedTickets([]);
-      
-      // Refresh analytics
-      const analyticsData = calculateAdminAnalytics();
-      setAnalytics(analyticsData);
-    }
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedTickets.length} ticket(s)?`);
+    if (!confirmed) return;
+    
+    selectedTickets.forEach(id => {
+      deleteTicket(id);
+    });
+    
+    setTickets(tickets.filter(ticket => !selectedTickets.includes(ticket.id)));
+    setSelectedTickets([]);
   };
 
   const toggleTicketSelection = (ticketId: string) => {
@@ -113,69 +105,61 @@ export default function AdminDashboardPage() {
   };
 
   const selectAllTickets = () => {
-    const filteredTicketIds = filteredTickets.map(t => t.id);
     setSelectedTickets(
-      selectedTickets.length === filteredTicketIds.length 
+      selectedTickets.length === filteredTickets.length 
         ? [] 
-        : filteredTicketIds
+        : filteredTickets.map(ticket => ticket.id)
     );
+  };
+
+  const exportToCSV = () => {
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      "ID,Title,Status,Priority,Category,Email,Created\n" +
+      tickets.map(ticket => 
+        `${ticket.id},"${ticket.title}",${ticket.status},${ticket.priority},${ticket.category},${ticket.email},${ticket.createdDate}`
+      ).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "tickets-export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // Filter tickets based on search and filters
   const filteredTickets = tickets.filter(ticket => {
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = 
-        ticket.title.toLowerCase().includes(searchLower) ||
-        ticket.description.toLowerCase().includes(searchLower);
-      
-      if (!matchesSearch) return false;
+    if (searchTerm && !ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
+        !ticket.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
     }
-    
     if (statusFilter && ticket.status !== statusFilter) return false;
     if (priorityFilter && ticket.priority !== priorityFilter) return false;
-    
     return true;
   });
 
-  const exportData = () => {
-    const dataStr = JSON.stringify(tickets, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `support-tickets-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
-
+  // Get status badge styling
   const getStatusBadge = (status: Status) => {
     switch (status) {
-      case 'Open':
-        return 'status-open';
-      case 'In Progress':
-        return 'status-progress';
-      case 'Closed':
-        return 'status-closed';
-      default:
-        return 'status-open';
+      case 'Open': return 'status-open';
+      case 'In Progress': return 'status-progress';
+      case 'Closed': return 'status-closed';
+      default: return 'status-open';
     }
   };
 
+  // Get priority badge styling
   const getPriorityBadge = (priority: Priority) => {
     switch (priority) {
-      case 'Low':
-        return 'priority-low';
-      case 'Medium':
-        return 'priority-medium';
-      case 'High':
-        return 'priority-high';
-      default:
-        return 'priority-medium';
+      case 'High': return 'priority-high';
+      case 'Medium': return 'priority-medium';
+      case 'Low': return 'priority-low';
+      default: return 'priority-medium';
     }
   };
 
+  // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-AU', {
       day: '2-digit',
@@ -188,7 +172,7 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-grey-50 flex items-center justify-center">
+      <div className="flex justify-center items-center min-h-screen bg-primary">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
       </div>
     );
@@ -197,23 +181,23 @@ export default function AdminDashboardPage() {
   const session = getAdminSession();
 
   return (
-    <div className="min-h-screen bg-grey-50">
+    <div className="min-h-screen bg-primary">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-grey-200">
+      <header className="bg-surface shadow-xl border-b border-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-                                                     <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center mr-3">
-               <Shield className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center mr-3">
+                <Shield className="w-5 h-5 text-black" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-grey-900">Admin Dashboard</h1>
-                <p className="text-sm text-grey-600">G'day AI Support Hub</p>
+                <h1 className="text-lg font-semibold text-primary">Admin Dashboard</h1>
+                <p className="text-sm text-secondary">G'day AI Support Hub</p>
               </div>
             </div>
             
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-grey-600">
+              <span className="text-sm text-secondary">
                 Welcome, {session?.user?.email}
               </span>
               <Link href="/" className="btn-outline text-sm">
@@ -233,51 +217,51 @@ export default function AdminDashboardPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Analytics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 fade-in">
+          <div className="card-compact">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-accent mr-4">
-                <BarChart3 className="w-6 h-6 text-white" />
+              <div className="p-3 rounded-xl bg-accent mr-4">
+                <BarChart3 className="w-6 h-6 text-black" />
               </div>
               <div>
-                <p className="text-sm font-medium text-grey-600">Total Tickets</p>
-                <p className="text-2xl font-bold text-grey-900">{analytics?.totalTickets || 0}</p>
+                <p className="text-sm font-medium text-secondary">Total Reports</p>
+                <p className="text-2xl font-bold text-primary">{analytics?.totalTickets || 0}</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card-compact">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-accent mr-4">
+              <div className="p-3 rounded-xl bg-red-500 mr-4">
                 <Clock className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-grey-600">Open Tickets</p>
-                <p className="text-2xl font-bold text-grey-900">{analytics?.ticketsByStatus.open || 0}</p>
+                <p className="text-sm font-medium text-secondary">Open Reports</p>
+                <p className="text-2xl font-bold text-primary">{analytics?.ticketsByStatus.open || 0}</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card-compact">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-accent mr-4">
+              <div className="p-3 rounded-xl bg-orange-500 mr-4">
                 <AlertTriangle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-grey-600">High Priority</p>
-                <p className="text-2xl font-bold text-grey-900">{analytics?.ticketsByPriority.high || 0}</p>
+                <p className="text-sm font-medium text-secondary">High Priority</p>
+                <p className="text-2xl font-bold text-primary">{analytics?.ticketsByPriority.high || 0}</p>
               </div>
             </div>
           </div>
 
-          <div className="card">
+          <div className="card-compact">
             <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-accent mr-4">
+              <div className="p-3 rounded-xl bg-green-500 mr-4">
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-grey-600">New Today</p>
-                <p className="text-2xl font-bold text-grey-900">{analytics?.recentActivity.newTicketsToday || 0}</p>
+                <p className="text-sm font-medium text-secondary">New Today</p>
+                <p className="text-2xl font-bold text-primary">{analytics?.recentActivity.newTicketsToday || 0}</p>
               </div>
             </div>
           </div>
@@ -285,72 +269,78 @@ export default function AdminDashboardPage() {
 
         {/* Category Breakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="card">
-            <h3 className="text-lg font-semibold text-grey-900 mb-4">Tickets by Category</h3>
+          <div className="card-compact">
+            <h3 className="text-lg font-semibold text-primary mb-4">Reports by Category</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">Access Request</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">Bug Reports</span>
+                <span className="text-sm font-medium text-primary">
+                  {tickets.filter(t => t.category === 'Bug Report').length}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-secondary">Feature Requests</span>
+                <span className="text-sm font-medium text-primary">
+                  {tickets.filter(t => t.category === 'Feature Request').length}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-secondary">Access Requests</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.ticketsByCategory.accessRequest || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">Technical Issue</span>
-                <span className="text-sm font-medium text-grey-900">
-                  {analytics?.ticketsByCategory.technicalIssue || 0}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">General Support</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">General Support</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.ticketsByCategory.generalSupport || 0}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="card">
-            <h3 className="text-lg font-semibold text-grey-900 mb-4">Status Distribution</h3>
+          <div className="card-compact">
+            <h3 className="text-lg font-semibold text-primary mb-4">Status Distribution</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">Open</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">Open</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.ticketsByStatus.open || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">In Progress</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">In Progress</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.ticketsByStatus.inProgress || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">Closed</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">Closed</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.ticketsByStatus.closed || 0}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="card">
-            <h3 className="text-lg font-semibold text-grey-900 mb-4">Recent Activity</h3>
+          <div className="card-compact">
+            <h3 className="text-lg font-semibold text-primary mb-4">Recent Activity</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">New Today</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">New Today</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.recentActivity.newTicketsToday || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">Closed Today</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">Closed Today</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.recentActivity.closedTicketsToday || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-grey-600">Avg Response (hrs)</span>
-                <span className="text-sm font-medium text-grey-900">
+                <span className="text-sm text-secondary">Avg Response (hrs)</span>
+                <span className="text-sm font-medium text-primary">
                   {analytics?.recentActivity.averageResponseTime || 0}
                 </span>
               </div>
@@ -358,51 +348,49 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Ticket Management */}
+        {/* Report Management */}
         <div className="card">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-grey-900">Ticket Management</h2>
-              <p className="text-grey-600">Manage all support tickets with bulk operations</p>
+              <h2 className="text-xl font-bold text-primary">Report Management</h2>
+              <p className="text-secondary">Manage all bug reports and feature requests with bulk operations</p>
             </div>
             
             <div className="flex items-center space-x-2">
               <button
                 onClick={loadDashboardData}
-                className="btn-outline flex items-center"
+                className="btn-secondary flex items-center"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
               </button>
               <button
-                onClick={exportData}
-                className="btn-outline flex items-center"
+                onClick={exportToCSV}
+                className="btn-secondary flex items-center"
               >
                 <Download className="w-4 h-4 mr-2" />
-                Export
+                Export CSV
               </button>
             </div>
           </div>
 
-          {/* Filters */}
+          {/* Search and Filters */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-grey-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search tickets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-grey-300 rounded-lg focus-ring"
-                />
-              </div>
+            <div className="flex-1 search-container">
+              <input
+                type="text"
+                placeholder="Search reports..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+              <Search className="search-icon w-4 h-4" />
             </div>
             
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as Status || '')}
-              className="px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+              className="form-select"
             >
               <option value="">All Statuses</option>
               <option value="Open">Open</option>
@@ -413,7 +401,7 @@ export default function AdminDashboardPage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as Priority || '')}
-              className="px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+              className="form-select"
             >
               <option value="">All Priorities</option>
               <option value="Low">Low</option>
@@ -424,33 +412,33 @@ export default function AdminDashboardPage() {
 
           {/* Bulk Actions */}
           {selectedTickets.length > 0 && (
-            <div className="bg-accent border border-accent-dark rounded-lg p-4 mb-6">
+            <div className="alert-attention-dark mb-6">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-black">
-                  {selectedTickets.length} ticket(s) selected
+                <span className="text-sm font-medium text-primary">
+                  {selectedTickets.length} report(s) selected
                 </span>
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => handleBulkStatusUpdate('Open')}
-                    className="text-sm bg-accent-dark text-white px-3 py-1 rounded hover:bg-accent"
+                    className="btn-small"
                   >
                     Mark Open
                   </button>
                   <button
                     onClick={() => handleBulkStatusUpdate('In Progress')}
-                    className="text-sm bg-accent-dark text-white px-3 py-1 rounded hover:bg-accent"
+                    className="btn-small"
                   >
                     Mark In Progress
                   </button>
                   <button
                     onClick={() => handleBulkStatusUpdate('Closed')}
-                    className="text-sm bg-accent-dark text-white px-3 py-1 rounded hover:bg-accent"
+                    className="btn-small"
                   >
                     Mark Closed
                   </button>
                   <button
                     onClick={handleBulkDelete}
-                    className="text-sm bg-accent-dark text-white px-3 py-1 rounded hover:bg-accent"
+                    className="btn-small-secondary text-red-400 hover:text-red-300"
                   >
                     Delete
                   </button>
@@ -459,57 +447,61 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* Tickets Table */}
-          <div className="overflow-x-auto">
+          {/* Reports Table */}
+          <div className="table-modern">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-grey-200">
-                  <th className="text-left py-3 px-4 font-medium text-grey-600">
+                <tr>
+                  <th className="table-header">
                     <input
                       type="checkbox"
                       checked={selectedTickets.length === filteredTickets.length && filteredTickets.length > 0}
                       onChange={selectAllTickets}
-                      className="rounded border-grey-300 text-accent focus:ring-accent"
+                      className="rounded border-dark-border text-accent focus:ring-accent"
                     />
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-grey-600">Title</th>
-                  <th className="text-left py-3 px-4 font-medium text-grey-600">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-grey-600">Priority</th>
-                  <th className="text-left py-3 px-4 font-medium text-grey-600">Category</th>
-                  <th className="text-left py-3 px-4 font-medium text-grey-600">Created</th>
+                  <th className="table-header">Title</th>
+                  <th className="table-header">Status</th>
+                  <th className="table-header">Priority</th>
+                  <th className="table-header">Category</th>
+                  <th className="table-header">Email</th>
+                  <th className="table-header">Created</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTickets.map((ticket) => (
-                  <tr key={ticket.id} className="border-b border-grey-200 hover:bg-grey-50">
-                    <td className="py-3 px-4">
+                  <tr key={ticket.id} className="table-row">
+                    <td className="table-cell">
                       <input
                         type="checkbox"
                         checked={selectedTickets.includes(ticket.id)}
                         onChange={() => toggleTicketSelection(ticket.id)}
-                        className="rounded border-grey-300 text-accent focus:ring-accent"
+                        className="rounded border-dark-border text-accent focus:ring-accent"
                       />
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-grey-900">{ticket.title}</div>
-                      <div className="text-sm text-grey-600 truncate max-w-xs">
+                    <td className="table-cell">
+                      <div className="font-medium text-primary">{ticket.title}</div>
+                      <div className="text-sm text-secondary truncate max-w-xs">
                         {ticket.description}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="table-cell">
                       <span className={`${getStatusBadge(ticket.status)}`}>
                         {ticket.status}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="table-cell">
                       <span className={`${getPriorityBadge(ticket.priority)}`}>
                         {ticket.priority}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-sm text-grey-600">
+                    <td className="table-cell text-sm text-secondary">
                       {ticket.category}
                     </td>
-                    <td className="py-3 px-4 text-sm text-grey-600">
+                    <td className="table-cell text-sm text-secondary">
+                      {ticket.email}
+                    </td>
+                    <td className="table-cell text-sm text-secondary">
                       {formatDate(ticket.createdDate)}
                     </td>
                   </tr>
@@ -520,7 +512,7 @@ export default function AdminDashboardPage() {
 
           {filteredTickets.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-grey-600">No tickets found matching your criteria.</p>
+              <p className="text-secondary">No reports found matching your criteria.</p>
             </div>
           )}
         </div>

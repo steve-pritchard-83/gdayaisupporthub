@@ -80,132 +80,142 @@ export default function KnowledgeBasePage() {
     });
   };
 
-  // Get category color
+  // Get category styling
   const getCategoryColor = (category: string) => {
     switch (category) {
+      case 'Bug Report':
+        return 'bg-red-500 text-white';
+      case 'Feature Request':
+        return 'bg-accent text-black';
       case 'Access Request':
-        return 'bg-accent text-black';
-      case 'Technical Issue':
-        return 'bg-accent text-black';
+        return 'bg-blue-500 text-white';
       case 'General Support':
-        return 'bg-accent text-black';
+        return 'bg-grey-500 text-white';
       default:
-        return 'bg-grey-100 text-grey-800';
+        return 'bg-grey-500 text-white';
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
+      <div className="flex items-center justify-center min-h-96">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+      <div className="text-center">
+        <div className="flex items-center justify-center mb-6">
           <Link
             href="/"
-            className="inline-flex items-center text-grey-600 hover:text-grey-900 mb-2"
+            className="inline-flex items-center text-secondary hover:text-primary mr-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Link>
-          <h1 className="text-3xl font-bold text-grey-900">Knowledge Base</h1>
-          <p className="text-grey-600 mt-1">
-            Find answers to common questions about AI tool access
-          </p>
         </div>
         
-        <Link href="/create" className="btn-primary">
-          Still need help? Create Ticket
-        </Link>
+        <h1 className="text-5xl font-bold text-primary mb-6">Knowledge Base</h1>
+        <p className="text-xl text-secondary max-w-2xl mx-auto leading-relaxed">
+          Find answers to frequently asked questions about bug reporting, feature requests, and AI tool access.
+        </p>
       </div>
 
-      {/* Search and Filter */}
-      <div className="card">
-        <div className="flex flex-col sm:flex-row gap-4">
+      {/* Search and Filters */}
+      <div className="card-compact">
+        <div className="flex flex-col md:flex-row gap-4">
           {/* Search */}
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-grey-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search articles, topics, or tags..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-grey-300 rounded-lg focus-ring"
-              />
-            </div>
+          <div className="flex-1 search-container">
+            <input
+              type="text"
+              placeholder="Search articles..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <Search className="search-icon w-5 h-5" />
           </div>
-          
+
           {/* Category Filter */}
-          <div className="sm:w-64">
+          <div className="min-w-[200px]">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+              className="form-select"
             >
               <option value="">All Categories</option>
               {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+                <option key={category} value={category}>
+                  {category}
+                </option>
               ))}
             </select>
           </div>
         </div>
-        
-        {/* Clear Filters */}
+
+        {/* Active Filters */}
         {(searchTerm || selectedCategory) && (
-          <div className="mt-4 flex justify-end">
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-primary">
+            <span className="text-sm text-secondary">Active filters:</span>
+            {searchTerm && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-accent text-black">
+                Search: "{searchTerm}"
+              </span>
+            )}
+            {selectedCategory && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-accent text-black">
+                Category: {selectedCategory}
+              </span>
+            )}
             <button
               onClick={clearFilters}
-              className="text-sm text-grey-600 hover:text-grey-900"
+              className="text-sm text-accent hover:text-accent-dark ml-2"
             >
-              Clear all filters
+              Clear all
             </button>
           </div>
         )}
       </div>
 
-      {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card text-center">
-          <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center mx-auto mb-3">
-            <BookOpen className="w-6 h-6 text-white" />
-          </div>
-          <h3 className="font-semibold text-grey-900 mb-2">Getting Started</h3>
-          <p className="text-sm text-grey-600">
-            New to AI tools? Start here for the basics.
-          </p>
-        </div>
-        
-        <div className="card text-center">
-          <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center mx-auto mb-3">
+      {/* Quick Help Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="card-compact text-center">
+          <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-6 h-6 text-white" />
           </div>
-          <h3 className="font-semibold text-grey-900 mb-2">Common Issues</h3>
-          <p className="text-sm text-grey-600">
-            Troubleshoot frequent problems quickly.
+          <h3 className="text-lg font-semibold text-primary mb-2">Bug Reports</h3>
+          <p className="text-sm text-secondary">
+            Learn how to report bugs effectively and get them resolved quickly.
           </p>
         </div>
         
-        <div className="card text-center">
-          <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center mx-auto mb-3">
+        <div className="card-compact text-center">
+          <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="w-6 h-6 text-black" />
+          </div>
+          <h3 className="text-lg font-semibold text-primary mb-2">Feature Requests</h3>
+          <p className="text-sm text-secondary">
+            Discover how to request new features and improvements.
+          </p>
+        </div>
+        
+        <div className="card-compact text-center">
+          <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-4">
             <Tag className="w-6 h-6 text-white" />
           </div>
-          <h3 className="font-semibold text-grey-900 mb-2">Policies</h3>
-          <p className="text-sm text-grey-600">
-            Understand usage guidelines and rules.
+          <h3 className="text-lg font-semibold text-primary mb-2">AI Tool Access</h3>
+          <p className="text-sm text-secondary">
+            Understand how to request access to various AI tools and services.
           </p>
         </div>
       </div>
 
       {/* Results Summary */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-grey-600">
+        <p className="text-sm text-secondary">
           {filteredArticles.length} of {articles.length} articles
         </p>
         
@@ -221,14 +231,14 @@ export default function KnowledgeBasePage() {
 
       {/* Articles List */}
       {filteredArticles.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-grey-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="w-8 h-8 text-grey-400" />
+        <div className="card text-center py-12">
+          <div className="w-16 h-16 bg-dark-surface-light rounded-full flex items-center justify-center mx-auto mb-4">
+            <BookOpen className="w-8 h-8 text-secondary" />
           </div>
-          <h3 className="text-lg font-medium text-grey-900 mb-2">
+          <h3 className="text-lg font-semibold text-primary mb-2">
             No articles found
           </h3>
-          <p className="text-grey-600 mb-6">
+          <p className="text-secondary mb-6">
             Try adjusting your search terms or clearing filters.
           </p>
           <button
@@ -241,35 +251,35 @@ export default function KnowledgeBasePage() {
       ) : (
         <div className="space-y-4">
           {filteredArticles.map((article) => (
-            <div key={article.id} className="card">
+            <div key={article.id} className="card-compact">
               <div
                 className="flex items-center justify-between cursor-pointer"
                 onClick={() => toggleArticle(article.id)}
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-grey-900">
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-lg font-semibold text-primary">
                       {article.title}
                     </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(article.category)}`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(article.category)}`}>
                       {article.category}
                     </span>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-grey-500">
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {formatDate(article.createdDate)}
-                    </div>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted">
                     <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>{formatDate(article.createdDate)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <Tag className="w-4 h-4" />
                       {article.tags.slice(0, 2).map((tag, index) => (
-                        <span key={index} className="text-xs bg-grey-100 px-2 py-1 rounded">
+                        <span key={index} className="text-xs bg-dark-surface-light px-2 py-1 rounded">
                           {tag}
                         </span>
                       ))}
                       {article.tags.length > 2 && (
-                        <span className="text-xs text-grey-500">
+                        <span className="text-xs text-muted">
                           +{article.tags.length - 2} more
                         </span>
                       )}
@@ -278,7 +288,7 @@ export default function KnowledgeBasePage() {
                 </div>
                 
                 <ChevronRight 
-                  className={`w-5 h-5 text-grey-400 transition-transform ${
+                  className={`w-5 h-5 text-secondary transition-transform ${
                     expandedArticle === article.id ? 'rotate-90' : ''
                   }`}
                 />
@@ -286,19 +296,19 @@ export default function KnowledgeBasePage() {
               
               {/* Expanded Content */}
               {expandedArticle === article.id && (
-                <div className="mt-4 pt-4 border-t border-grey-200">
+                <div className="mt-6 pt-6 border-t border-primary">
                   <div className="prose max-w-none">
-                    <p className="text-grey-700 whitespace-pre-wrap">
+                    <p className="text-secondary whitespace-pre-wrap leading-relaxed">
                       {article.content}
                     </p>
                   </div>
                   
                   {/* Tags */}
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-6 flex flex-wrap gap-2">
                     {article.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-grey-100 text-grey-800"
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-dark-surface-light text-secondary"
                       >
                         <Tag className="w-3 h-3 mr-1" />
                         {tag}
@@ -313,18 +323,16 @@ export default function KnowledgeBasePage() {
       )}
 
       {/* Still Need Help */}
-              <div className="card bg-accent border-accent-dark">
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-black mb-2">
-            Still need help?
-          </h3>
-          <p className="text-black mb-4">
-            Can't find the answer you're looking for? Create a support ticket and our team will assist you.
-          </p>
-          <Link href="/create" className="btn-primary">
-            Create Support Ticket
-          </Link>
-        </div>
+      <div className="alert-attention-dark text-center">
+        <h3 className="text-xl font-semibold text-primary mb-4">
+          Still need help?
+        </h3>
+        <p className="text-secondary mb-6 leading-relaxed">
+          Can't find the answer you're looking for? Create a bug report or feature request and our team will assist you.
+        </p>
+        <Link href="/create" className="btn-primary">
+          Report Bug or Request Feature
+        </Link>
       </div>
     </div>
   );

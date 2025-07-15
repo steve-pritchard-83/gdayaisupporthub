@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Plus, ArrowLeft, Clock, CheckCircle, AlertCircle, Calendar, User } from 'lucide-react';
+import { Search, Filter, Plus, ArrowLeft, Clock, CheckCircle, AlertCircle, Calendar, User, Mail } from 'lucide-react';
 import { Ticket, TicketFilters, Priority, Category, Status } from '@/types';
 import { getTickets, saveTicket, deleteTicket } from '@/utils/localStorage';
+import { isAdminAuthenticated } from '@/utils/adminAuth';
 
 export default function ViewTicketsPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   const [filters, setFilters] = useState<TicketFilters>({
     searchTerm: '',
@@ -25,6 +27,9 @@ export default function ViewTicketsPage() {
       setTickets(allTickets);
       setLoading(false);
     };
+    
+    // Check admin authentication
+    setIsAdmin(isAdminAuthenticated());
     
     loadTickets();
   }, []);
@@ -58,32 +63,8 @@ export default function ViewTicketsPage() {
       }
       
       return true;
-    }).sort((a, b) => {
-      // Sort by created date (newest first)
-      return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
     });
   }, [tickets, filters]);
-
-  // Update ticket status
-  const updateTicketStatus = (ticketId: string, newStatus: Status) => {
-    const updatedTickets = tickets.map(ticket => {
-      if (ticket.id === ticketId) {
-        const updatedTicket = { ...ticket, status: newStatus };
-        saveTicket(updatedTicket); // Save to localStorage
-        return updatedTicket;
-      }
-      return ticket;
-    });
-    setTickets(updatedTickets);
-  };
-
-  // Delete ticket
-  const handleDeleteTicket = (ticketId: string) => {
-    if (window.confirm('Are you sure you want to delete this ticket?')) {
-      deleteTicket(ticketId);
-      setTickets(tickets.filter(ticket => ticket.id !== ticketId));
-    }
-  };
 
   // Clear all filters
   const clearFilters = () => {
@@ -95,111 +76,129 @@ export default function ViewTicketsPage() {
     });
   };
 
-  // Get status badge styling
-  const getStatusBadge = (status: Status) => {
-    switch (status) {
-      case 'Open':
-        return 'status-open';
-      case 'In Progress':
-        return 'status-progress';
-      case 'Closed':
-        return 'status-closed';
-      default:
-        return 'status-open';
+  // Handle status change
+  const handleStatusChange = async (ticketId: string, newStatus: Status) => {
+    const updatedTickets = tickets.map(ticket =>
+      ticket.id === ticketId 
+        ? { ...ticket, status: newStatus, updatedDate: new Date().toISOString() }
+        : ticket
+    );
+    
+    setTickets(updatedTickets);
+    
+    // Save to localStorage
+    const updatedTicket = updatedTickets.find(t => t.id === ticketId);
+    if (updatedTicket) {
+      await saveTicket(updatedTicket);
     }
   };
 
-  // Get priority badge styling
-  const getPriorityBadge = (priority: Priority) => {
+  // Handle ticket deletion
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (window.confirm('Are you sure you want to delete this ticket?')) {
+      const success = await deleteTicket(ticketId);
+      if (success) {
+        setTickets(tickets.filter(t => t.id !== ticketId));
+      }
+    }
+  };
+
+  // Get priority color
+  const getPriorityColor = (priority: Priority) => {
     switch (priority) {
-      case 'Low':
-        return 'priority-low';
-      case 'Medium':
-        return 'priority-medium';
-      case 'High':
-        return 'priority-high';
-      default:
-        return 'priority-medium';
+      case 'High': return 'priority-high';
+      case 'Medium': return 'priority-medium';
+      case 'Low': return 'priority-low';
+      default: return 'priority-medium';
     }
   };
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-AU', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  // Get status color
+  const getStatusColor = (status: Status) => {
+    switch (status) {
+      case 'Open': return 'status-open';
+      case 'In Progress': return 'status-progress';
+      case 'Closed': return 'status-closed';
+      default: return 'status-open';
+    }
+  };
+
+  // Get status icon
+  const getStatusIcon = (status: Status) => {
+    switch (status) {
+      case 'Open': return Clock;
+      case 'In Progress': return AlertCircle;
+      case 'Closed': return CheckCircle;
+      default: return Clock;
+    }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
+      <div className="flex items-center justify-center min-h-96">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <Link
-            href="/"
-            className="inline-flex items-center text-grey-600 hover:text-grey-900 mb-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Link>
-          <h1 className="text-3xl font-bold text-grey-900">Support Tickets</h1>
-          <p className="text-grey-600 mt-1">
-            Manage and track all support requests
+          <div className="flex items-center mb-4">
+            <Link
+              href="/"
+              className="inline-flex items-center text-secondary hover:text-primary mr-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+          </div>
+          <h1 className="text-4xl font-bold text-primary mb-2">Bug Reports & Feature Requests</h1>
+          <p className="text-secondary text-lg">
+            Track and manage all submitted reports and requests
           </p>
         </div>
         
         <Link href="/create" className="btn-primary">
           <Plus className="w-4 h-4 mr-2" />
-          Create New Ticket
+          New Report
         </Link>
       </div>
 
-      {/* Filters and Search */}
-      <div className="card">
-        <div className="flex flex-col sm:flex-row gap-4">
+      {/* Search and Filters */}
+      <div className="card-compact">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
           {/* Search */}
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-grey-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search tickets..."
-                value={filters.searchTerm}
-                onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 border border-grey-300 rounded-lg focus-ring"
-              />
-            </div>
+          <div className="flex-1 search-container">
+            <input
+              type="text"
+              placeholder="Search reports..."
+              value={filters.searchTerm}
+              onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+              className="search-input"
+            />
+            <Search className="search-icon w-5 h-5" />
           </div>
-          
+
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="btn-outline flex items-center"
+            className="btn-secondary flex items-center"
           >
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </button>
         </div>
 
-        {/* Filter Options */}
+        {/* Advanced Filters */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-grey-200">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="border-t border-primary pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Status Filter */}
               <div>
-                <label className="block text-sm font-medium text-grey-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-3">
                   Status
                 </label>
                 <select
@@ -208,7 +207,7 @@ export default function ViewTicketsPage() {
                     ...prev, 
                     status: e.target.value as Status || undefined 
                   }))}
-                  className="w-full px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+                  className="form-select"
                 >
                   <option value="">All Statuses</option>
                   <option value="Open">Open</option>
@@ -219,7 +218,7 @@ export default function ViewTicketsPage() {
 
               {/* Priority Filter */}
               <div>
-                <label className="block text-sm font-medium text-grey-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-3">
                   Priority
                 </label>
                 <select
@@ -228,7 +227,7 @@ export default function ViewTicketsPage() {
                     ...prev, 
                     priority: e.target.value as Priority || undefined 
                   }))}
-                  className="w-full px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+                  className="form-select"
                 >
                   <option value="">All Priorities</option>
                   <option value="Low">Low</option>
@@ -239,7 +238,7 @@ export default function ViewTicketsPage() {
 
               {/* Category Filter */}
               <div>
-                <label className="block text-sm font-medium text-grey-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-3">
                   Category
                 </label>
                 <select
@@ -248,21 +247,22 @@ export default function ViewTicketsPage() {
                     ...prev, 
                     category: e.target.value as Category || undefined 
                   }))}
-                  className="w-full px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+                  className="form-select"
                 >
                   <option value="">All Categories</option>
+                  <option value="Bug Report">Bug Report</option>
+                  <option value="Feature Request">Feature Request</option>
                   <option value="Access Request">Access Request</option>
-                  <option value="Technical Issue">Technical Issue</option>
                   <option value="General Support">General Support</option>
                 </select>
               </div>
             </div>
             
             {/* Clear Filters */}
-            <div className="mt-4 flex justify-end">
+            <div className="mt-6 flex justify-end">
               <button
                 onClick={clearFilters}
-                className="text-sm text-grey-600 hover:text-grey-900"
+                className="text-sm text-secondary hover:text-accent transition-colors"
               >
                 Clear all filters
               </button>
@@ -273,104 +273,115 @@ export default function ViewTicketsPage() {
 
       {/* Results Summary */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-grey-600">
-          {filteredTickets.length} of {tickets.length} tickets
+        <p className="text-sm text-secondary">
+          {filteredTickets.length} of {tickets.length} reports
         </p>
         
         {filteredTickets.length === 0 && tickets.length > 0 && (
-          <button
-            onClick={clearFilters}
-            className="text-sm text-accent hover:text-accent-dark"
-          >
-            Clear filters
-          </button>
+          <p className="text-sm text-muted">
+            No reports match your current filters
+          </p>
         )}
       </div>
 
       {/* Tickets List */}
-      {filteredTickets.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-grey-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-grey-400" />
+      <div className="space-y-4">
+        {filteredTickets.length === 0 ? (
+          <div className="card text-center py-12">
+            <div className="w-16 h-16 bg-dark-surface-light rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-secondary" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary mb-2">
+              {tickets.length === 0 ? 'No Reports Yet' : 'No Reports Found'}
+            </h3>
+            <p className="text-secondary mb-6">
+              {tickets.length === 0 
+                ? 'Start by creating your first bug report or feature request.'
+                : 'Try adjusting your search or filter criteria.'
+              }
+            </p>
+            {tickets.length === 0 && (
+              <Link href="/create" className="btn-primary">
+                <Plus className="w-4 h-4 mr-2" />
+                Create First Report
+              </Link>
+            )}
           </div>
-          <h3 className="text-lg font-medium text-grey-900 mb-2">
-            {tickets.length === 0 ? 'No tickets yet' : 'No tickets found'}
-          </h3>
-          <p className="text-grey-600 mb-6">
-            {tickets.length === 0 
-              ? 'Create your first support ticket to get started.'
-              : 'Try adjusting your search or filters.'
-            }
-          </p>
-          <Link href="/create" className="btn-primary">
-            Create New Ticket
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredTickets.map((ticket) => (
-            <div key={ticket.id} className="card card-hover">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                {/* Ticket Info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-grey-900">
-                      {ticket.title}
-                    </h3>
-                    <span className={`${getStatusBadge(ticket.status)}`}>
-                      {ticket.status}
-                    </span>
-                    <span className={`${getPriorityBadge(ticket.priority)}`}>
-                      {ticket.priority}
-                    </span>
-                  </div>
-                  
-                  <p className="text-grey-600 mb-3 line-clamp-2">
-                    {ticket.description}
-                  </p>
-                  
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-grey-500">
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {formatDate(ticket.createdDate)}
+        ) : (
+          filteredTickets.map((ticket) => {
+            const StatusIcon = getStatusIcon(ticket.status);
+            
+            return (
+              <div key={ticket.id} className="card-compact card-hover">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <StatusIcon className="w-5 h-5 text-secondary" />
+                      <h3 className="text-lg font-semibold text-primary">{ticket.title}</h3>
                     </div>
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 mr-1" />
-                      {ticket.category}
-                    </div>
-                    <div className="flex items-center">
-                      <span className="w-2 h-2 bg-grey-400 rounded-full mr-1"></span>
-                      ID: {ticket.id.slice(-6)}
+                    
+                    <p className="text-secondary mb-4 leading-relaxed">
+                      {ticket.description.length > 150 
+                        ? `${ticket.description.substring(0, 150)}...` 
+                        : ticket.description
+                      }
+                    </p>
+                    
+                    <div className="flex items-center gap-4 text-sm text-muted">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{new Date(ticket.createdDate).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        <span>{ticket.category}</span>
+                      </div>
+                      {isAdmin && (
+                        <div className="flex items-center gap-1">
+                          <Mail className="w-4 h-4" />
+                          <span>{ticket.email}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-2">
-                  {/* Status Change */}
-                  <select
-                    value={ticket.status}
-                    onChange={(e) => updateTicketStatus(ticket.id, e.target.value as Status)}
-                    className="px-3 py-1 text-sm border border-grey-300 rounded focus-ring"
-                  >
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Closed">Closed</option>
-                  </select>
                   
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => handleDeleteTicket(ticket.id)}
-                                         className="px-3 py-1 text-sm text-black hover:text-white border border-accent rounded hover:bg-accent"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex items-center gap-3 ml-6">
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`${getPriorityColor(ticket.priority)}`}>
+                        {ticket.priority}
+                      </span>
+                      <span className={`${getStatusColor(ticket.status)}`}>
+                        {ticket.status}
+                      </span>
+                    </div>
+                    
+                    {isAdmin && (
+                      <div className="flex flex-col gap-2">
+                        <select
+                          value={ticket.status}
+                          onChange={(e) => handleStatusChange(ticket.id, e.target.value as Status)}
+                          className="form-select text-sm py-1"
+                        >
+                          <option value="Open">Open</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Closed">Closed</option>
+                        </select>
+                        
+                        <button
+                          onClick={() => handleDeleteTicket(ticket.id)}
+                          className="btn-small-secondary text-red-400 hover:text-red-300"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            );
+          })
+        )}
+      </div>
     </div>
   );
 } 

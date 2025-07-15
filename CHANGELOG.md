@@ -27,6 +27,46 @@ All notable changes to this project will be documented in this file.
 
 ## Project History
 
+### [January 2025] - Light/Dark Theme Toggle Implementation - Claude Sonnet 4
+
+### Added
+- **Full theme toggle system** with light/dark mode switching
+- **Theme context provider** with localStorage persistence
+- **Theme-aware SVG logo** that adapts text color based on theme
+- **Toggle button** in header navigation (sun/moon icons)
+- **CSS theme variables** for both light and dark modes
+- **Email capture** in ticket creation form for Teams contact
+- **Admin-only ticket controls** - only authenticated admins can edit/delete tickets
+
+### Changed
+- **All CSS components** updated to use theme variables instead of hardcoded colors
+- **Logo text color** now switches between white (dark theme) and dark grey (light theme)
+- **Ticket interface** updated to include email field with validation
+- **Admin dashboard** now displays user email addresses for Teams outreach
+- **Navigation layout** updated to include theme toggle button
+- **Status badges** now use `whitespace-nowrap` to prevent text wrapping
+
+### Fixed
+- **TypeScript errors** in admin analytics for category names
+- **Status display** formatting issues in admin dashboard
+- **Build configuration** already optimized for static export
+
+### Decisions Made
+- **Default theme**: Dark mode by default, stored in localStorage as 'gday-theme'
+- **Logo adaptation**: SVG text uses CSS variable `--logo-text` for theme-aware coloring
+- **Theme persistence**: User preference saved across browser sessions
+- **Email requirement**: All new tickets must include user email for admin follow-up
+- **Access control**: Only authenticated admins can modify or delete tickets
+- **Design demo removal**: Removed from navigation to clean up menu
+
+### Notes
+- Theme system is fully functional and provides professional UX
+- Email integration enables Teams-based user outreach
+- All existing functionality preserved while adding new features
+- Ready for production deployment with static export
+
+---
+
 ### [January 2025] - Design System Refinement - Claude Sonnet 4
 
 ### Added

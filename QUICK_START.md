@@ -26,19 +26,23 @@ npm run dev
    - Verify dashboard and bulk operations
 
 ### Quick Status Check
-- [ ] Home page loads with G'day logo (yellow shape, grey text)
-- [ ] Can create tickets with validation
+- [ ] Home page loads with G'day logo (yellow shape, theme-aware text)
+- [ ] Theme toggle works (sun/moon icon in header)
+- [ ] Can create tickets with email validation
 - [ ] Can view tickets with search/filter
 - [ ] Knowledge base shows 5 FAQ articles
 - [ ] Admin login works
-- [ ] Admin dashboard shows analytics
+- [ ] Admin dashboard shows analytics and email addresses
+- [ ] Only admin can edit/delete tickets (public users view-only)
 
 ## 🔧 Current Project State
-- **Status**: ✅ Complete and functional with refined design system
+- **Status**: ✅ Complete and functional with light/dark theme system
 - **Company**: G'day Group
 - **Tech Stack**: Next.js 14, TypeScript, Tailwind, localStorage
 - **Font**: Segoe UI (system font)
 - **Design**: 8-point grid system, strict yellow branding
+- **Themes**: Light/dark mode toggle with persistence
 - **Admin Access**: Hardcoded credentials (POC)
+- **Email Integration**: User emails captured for Teams outreach
 
 **If any issues**: Check PROJECT_MEMORY.md for full context and troubleshooting. 

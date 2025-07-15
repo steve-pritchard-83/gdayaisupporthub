@@ -2,7 +2,7 @@
 export type Priority = 'Low' | 'Medium' | 'High';
 
 // Ticket categories
-export type Category = 'Access Request' | 'Technical Issue' | 'General Support';
+export type Category = 'Bug Report' | 'Feature Request' | 'Access Request' | 'General Support';
 
 // Ticket status
 export type Status = 'Open' | 'In Progress' | 'Closed';
@@ -15,6 +15,7 @@ export interface Ticket {
   priority: Priority;
   category: Category;
   status: Status;
+  email: string; // User email for Teams contact
   createdDate: string; // ISO string format
   updatedDate?: string; // ISO string format
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Eye, BookOpen, BarChart3, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { getTicketStats, initializeDefaultData } from '@/utils/localStorage';
+import { isAdminAuthenticated } from '@/utils/adminAuth';
 import { TicketStats } from '@/types';
 
 export default function HomePage() {
@@ -14,6 +15,8 @@ export default function HomePage() {
     closed: 0,
     highPriority: 0,
   });
+  
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Initialize default data on first load
@@ -22,21 +25,24 @@ export default function HomePage() {
     // Load ticket stats
     const currentStats = getTicketStats();
     setStats(currentStats);
+    
+    // Check admin authentication status
+    setIsAdmin(isAdminAuthenticated());
   }, []);
 
   const quickActions = [
     {
-      name: 'Create New Ticket',
+      name: 'Report Bug or Request Feature',
       href: '/create',
       icon: Plus,
-      description: 'Submit a new support request',
+      description: 'Submit a bug report or feature request',
       color: 'bg-accent hover:bg-accent-dark',
     },
     {
-      name: 'View All Tickets',
+      name: 'View All Reports',
       href: '/tickets',
       icon: Eye,
-      description: 'Browse and manage existing tickets',
+      description: 'Browse and manage bug reports and feature requests',
       color: 'bg-accent hover:bg-accent-dark',
     },
     {
@@ -50,45 +56,45 @@ export default function HomePage() {
 
   const statCards = [
     {
-      name: 'Total Tickets',
+      name: 'Total Reports',
       value: stats.total,
       icon: BarChart3,
-      color: 'text-white',
+      color: 'text-black',
       bgColor: 'bg-accent',
     },
     {
-      name: 'Open Tickets',
+      name: 'Open Reports',
       value: stats.open,
       icon: Clock,
       color: 'text-white',
-      bgColor: 'bg-accent',
+      bgColor: 'bg-red-500',
     },
     {
       name: 'In Progress',
       value: stats.inProgress,
       icon: AlertCircle,
       color: 'text-white',
-      bgColor: 'bg-accent',
+      bgColor: 'bg-orange-500',
     },
     {
-      name: 'Closed Tickets',
+      name: 'Closed Reports',
       value: stats.closed,
       icon: CheckCircle,
       color: 'text-white',
-      bgColor: 'bg-accent',
+      bgColor: 'bg-green-500',
     },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12 fade-in">
       {/* Welcome Section */}
-      <div className="text-center py-12">
-        <h1 className="text-4xl font-bold text-grey-900 mb-4">
+      <div className="text-center py-16">
+        <h1 className="text-5xl font-bold text-primary mb-6">
           Welcome to G&rsquo;day AI Support Hub
         </h1>
-        <p className="text-xl text-grey-600 max-w-2xl mx-auto">
-          Your one-stop solution for managing AI tool access requests and getting technical support. 
-          Create tickets, track progress, and find answers quickly.
+        <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">
+          Your modern platform for reporting bugs, requesting features, and managing AI tool access. 
+          Submit reports, track progress, and find answers quickly with our streamlined interface.
         </p>
       </div>
 
@@ -97,14 +103,14 @@ export default function HomePage() {
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className="card">
+            <div key={stat.name} className="card-compact">
               <div className="flex items-center">
-                <div className={`p-3 rounded-lg ${stat.bgColor} mr-4`}>
+                <div className={`p-3 rounded-xl ${stat.bgColor} mr-4`}>
                   <Icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-grey-600">{stat.name}</p>
-                  <p className="text-2xl font-bold text-grey-900">{stat.value}</p>
+                  <p className="text-sm font-medium text-secondary">{stat.name}</p>
+                  <p className="text-2xl font-bold text-primary">{stat.value}</p>
                 </div>
               </div>
             </div>
@@ -113,45 +119,45 @@ export default function HomePage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {quickActions.map((action) => {
           const Icon = action.icon;
           return (
             <Link
               key={action.name}
               href={action.href}
-              className="card card-hover group transition-all duration-200 hover:scale-105"
+              className="card card-hover group transition-all duration-300"
             >
               <div className="text-center">
-                <div className={`inline-flex p-4 rounded-xl ${action.color} text-white mb-4 group-hover:scale-110 transition-transform`}>
+                <div className={`inline-flex p-6 rounded-2xl ${action.color} text-black mb-6 group-hover:scale-110 transition-transform shadow-lg`}>
                   <Icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-semibold text-grey-900 mb-2">{action.name}</h3>
-                <p className="text-grey-600">{action.description}</p>
+                <h3 className="text-xl font-semibold text-primary mb-3">{action.name}</h3>
+                <p className="text-secondary leading-relaxed">{action.description}</p>
               </div>
             </Link>
           );
         })}
       </div>
 
-      {/* High Priority Alert */}
-      {stats.highPriority > 0 && (
-        <div className="bg-accent border border-accent-dark rounded-lg p-4">
+      {/* High Priority Alert - Only show to admin */}
+      {isAdmin && stats.highPriority > 0 && (
+        <div className="alert-attention-dark">
           <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-white mr-2" />
-            <div>
-              <h3 className="text-sm font-medium text-black">
-                High Priority Tickets Require Attention
+            <AlertCircle className="w-6 h-6 text-accent mr-4" />
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-primary">
+                High Priority Reports Require Attention
               </h3>
-              <p className="text-sm text-black mt-1">
-                You have {stats.highPriority} high priority ticket{stats.highPriority > 1 ? 's' : ''} that need immediate attention.
+              <p className="text-secondary mt-1">
+                You have {stats.highPriority} high priority bug report{stats.highPriority > 1 ? 's' : ''} that need immediate attention.
               </p>
             </div>
             <Link
               href="/tickets"
-              className="ml-auto btn-primary bg-accent-dark hover:bg-accent"
+              className="btn-primary ml-4"
             >
-              View Tickets
+              View Reports
             </Link>
           </div>
         </div>
@@ -159,11 +165,11 @@ export default function HomePage() {
 
       {/* Getting Started */}
       <div className="card">
-        <h2 className="text-2xl font-bold text-grey-900 mb-4">Getting Started</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h2 className="text-3xl font-bold text-primary mb-8">Getting Started</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <h3 className="text-lg font-semibold text-grey-900 mb-2">New to AI Tools?</h3>
-            <p className="text-grey-600 mb-4">
+            <h3 className="text-xl font-semibold text-primary mb-4">New to AI Tools?</h3>
+            <p className="text-secondary mb-6 leading-relaxed">
               Start by browsing our knowledge base to understand what AI tools are available 
               and how to request access.
             </p>
@@ -172,13 +178,13 @@ export default function HomePage() {
             </Link>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-grey-900 mb-2">Need Help?</h3>
-            <p className="text-grey-600 mb-4">
-              Create a support ticket and our team will help you with access requests, 
-              technical issues, or general questions.
+            <h3 className="text-xl font-semibold text-primary mb-4">Found an Issue?</h3>
+            <p className="text-secondary mb-6 leading-relaxed">
+              Report a bug or request a new feature to help improve our AI tools 
+              and services for everyone.
             </p>
             <Link href="/create" className="btn-primary">
-              Create Support Ticket
+              Report Bug or Request Feature
             </Link>
           </div>
         </div>

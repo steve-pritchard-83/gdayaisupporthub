@@ -1,3 +1,10 @@
 {
-  "/not-found": "app/not-found.js"
+  "/_not-found": "app/_not-found.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/create/page": "app/create/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/knowledge/page": "app/knowledge/page.js",
+  "/tickets/page": "app/tickets/page.js",
+  "/design-demo/page": "app/design-demo/page.js",
+  "/page": "app/page.js"
 }

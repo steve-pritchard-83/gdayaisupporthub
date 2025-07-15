@@ -38,6 +38,9 @@
 - ✅ **Admin Dashboard**: Analytics, bulk operations, data export
 - ✅ **Knowledge Base**: 5 pre-loaded FAQ articles with search
 - ✅ **Authentication**: Admin login with 24-hour sessions
+- ✅ **Light/Dark Theme Toggle**: Full theme system with persistence
+- ✅ **Email Integration**: Capture user emails for Teams outreach
+- ✅ **Admin Access Control**: Only authenticated admins can edit/delete tickets
 - ✅ **Responsive Design**: Mobile, tablet, desktop optimized
 - ✅ **Data Persistence**: localStorage with error handling
 
@@ -61,7 +64,8 @@ supporthubv2/
 │   └── admin.ts                 # Admin-specific types
 ├── utils/
 │   ├── localStorage.ts          # CRUD operations
-│   └── adminAuth.ts             # Authentication logic
+│   ├── adminAuth.ts             # Authentication logic
+│   └── themeContext.tsx         # Theme provider and context
 └── PROJECT_MEMORY.md            # This file
 ```
 
@@ -115,8 +119,52 @@ Spacing System (8-Point Grid):
 ### Logo Implementation
 - **SVG Location**: `components/Layout.tsx` lines 37-47
 - **Shape Color**: Yellow accent (`fill-accent`)
-- **Text Color**: Grey (`fill-grey-700`)
+- **Text Color**: Theme-aware (`fill-logo-text` CSS variable)
 - **Size**: `h-10 w-auto` (40px height, responsive width)
+
+---
+
+## 🎨 Theme System (January 2025)
+
+### Theme Toggle Implementation
+- **Context Provider**: `utils/themeContext.tsx` manages theme state
+- **Persistence**: Theme preference stored in localStorage as 'gday-theme'
+- **Default**: Dark mode by default, user can toggle to light mode
+- **Toggle Button**: Sun/Moon icons in navigation bar (desktop and mobile)
+
+### CSS Theme Variables
+```css
+/* Dark Theme */
+[data-theme="dark"] {
+  --primary-bg: #0f1419;
+  --surface-bg: #1a1f26;
+  --surface-light: #252b34;
+  --border-color: #2d3748;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --text-muted: #718096;
+  --logo-text: #ffffff;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --primary-bg: #ffffff;
+  --surface-bg: #f9fafb;
+  --surface-light: #ffffff;
+  --border-color: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --logo-text: #374151;
+}
+```
+
+### Theme-Aware Components
+- **All CSS classes** updated to use CSS variables
+- **Logo text** automatically changes color based on theme
+- **Form controls** adapt to theme (inputs, selects, textareas)
+- **Tables and cards** fully theme-compatible
+- **Smooth transitions** between theme changes
 
 ---
 
@@ -153,8 +201,9 @@ interface Ticket {
   title: string;                 // Required, 5-100 chars
   description: string;           // Required, 10-1000 chars
   priority: 'Low' | 'Medium' | 'High';
-  category: 'Access Request' | 'Technical Issue' | 'General Support';
+  category: 'Bug Report' | 'Feature Request' | 'Access Request' | 'General Support';
   status: 'Open' | 'In Progress' | 'Closed';
+  email: string;                 // User email for Teams contact
   createdDate: string;           // ISO string
   updatedDate?: string;          // ISO string
 }

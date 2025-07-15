@@ -131,7 +131,8 @@ export const calculateAdminAnalytics = (): AdminAnalytics => {
   // Count tickets by category
   const ticketsByCategory = {
     accessRequest: tickets.filter(t => t.category === 'Access Request').length,
-    technicalIssue: tickets.filter(t => t.category === 'Technical Issue').length,
+    bugReport: tickets.filter(t => t.category === 'Bug Report').length,
+    featureRequest: tickets.filter(t => t.category === 'Feature Request').length,
     generalSupport: tickets.filter(t => t.category === 'General Support').length,
   };
   

@@ -12,11 +12,13 @@ interface FormData {
   description: string;
   priority: Priority;
   category: Category;
+  email: string;
 }
 
 interface FormErrors {
   title?: string;
   description?: string;
+  email?: string;
 }
 
 export default function CreateTicketPage() {
@@ -29,7 +31,8 @@ export default function CreateTicketPage() {
     title: '',
     description: '',
     priority: 'Medium',
-    category: 'General Support',
+    category: 'Bug Report',
+    email: '',
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
@@ -54,6 +57,12 @@ export default function CreateTicketPage() {
       newErrors.description = 'Description must be less than 1000 characters';
     }
     
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,6 +83,7 @@ export default function CreateTicketPage() {
         description: formData.description.trim(),
         priority: formData.priority,
         category: formData.category,
+        email: formData.email.trim(),
         status: 'Open',
         createdDate: new Date().toISOString(),
       };
@@ -88,7 +98,8 @@ export default function CreateTicketPage() {
           title: '',
           description: '',
           priority: 'Medium',
-          category: 'General Support',
+          category: 'Bug Report',
+          email: '',
         });
         
         // Redirect after short delay
@@ -99,7 +110,7 @@ export default function CreateTicketPage() {
         throw new Error('Failed to save ticket');
       }
     } catch (error) {
-      setSubmitError('Failed to create ticket. Please try again.');
+      setSubmitError('Failed to submit report. Please try again.');
       console.error('Error creating ticket:', error);
     } finally {
       setIsSubmitting(false);
@@ -119,18 +130,18 @@ export default function CreateTicketPage() {
   if (submitSuccess) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="text-center py-12">
-                                 <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-         <CheckCircle className="w-8 h-8 text-white" />
-        </div>
-          <h1 className="text-2xl font-bold text-grey-900 mb-4">
-            Ticket Created Successfully!
+        <div className="text-center py-16 fade-in">
+          <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <CheckCircle className="w-10 h-10 text-black" />
+          </div>
+          <h1 className="text-3xl font-bold text-primary mb-6">
+            Report Submitted Successfully!
           </h1>
-          <p className="text-grey-600 mb-8">
-            Your support ticket has been created and assigned. You'll be redirected to the tickets page shortly.
+          <p className="text-secondary mb-8 leading-relaxed">
+            Your bug report or feature request has been submitted and will be reviewed by our team. You'll be redirected to the tickets page shortly.
           </p>
           <Link href="/tickets" className="btn-primary">
-            View All Tickets
+            View All Reports
           </Link>
         </div>
       </div>
@@ -138,37 +149,37 @@ export default function CreateTicketPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto fade-in">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-12">
         <Link
           href="/"
-          className="inline-flex items-center text-grey-600 hover:text-grey-900 mb-4"
+          className="inline-flex items-center text-secondary hover:text-primary mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
         </Link>
-        <h1 className="text-3xl font-bold text-grey-900">Create New Ticket</h1>
-        <p className="text-grey-600 mt-2">
-          Submit a new support request for AI tool access or technical assistance.
+        <h1 className="text-4xl font-bold text-primary mb-4">Report Bug or Request Feature</h1>
+        <p className="text-secondary text-lg leading-relaxed">
+          Submit a bug report, feature request, or AI tool access request to help improve our platform.
         </p>
       </div>
 
       {/* Error Alert */}
       {submitError && (
-                             <div className="bg-accent border border-accent-dark rounded-lg p-4 mb-6">
+        <div className="alert-attention-dark mb-8">
           <div className="flex items-center">
-           <AlertCircle className="w-5 h-5 text-white mr-2" />
-           <span className="text-black">{submitError}</span>
+            <AlertCircle className="w-5 h-5 text-accent mr-3" />
+            <span className="text-primary">{submitError}</span>
           </div>
         </div>
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="card space-y-6">
+      <form onSubmit={handleSubmit} className="card space-y-8">
         {/* Title Field */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-grey-700 mb-2">
+          <label htmlFor="title" className="block text-sm font-medium text-secondary mb-3">
             Title *
           </label>
           <input
@@ -176,45 +187,70 @@ export default function CreateTicketPage() {
             id="title"
             value={formData.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus-ring ${
-              errors.title ? 'border-red-300' : 'border-grey-300'
+            className={`form-input ${
+              errors.title ? 'border-red-500' : ''
             }`}
-            placeholder="Brief description of your issue..."
+            placeholder="Brief description of the bug or feature you'd like to report..."
             disabled={isSubmitting}
           />
           {errors.title && (
-                         <p className="mt-1 text-sm text-black bg-accent px-2 py-1 rounded">{errors.title}</p>
+            <p className="mt-2 text-sm text-accent bg-dark-surface-light px-3 py-2 rounded-lg">{errors.title}</p>
           )}
+        </div>
+
+        {/* Email Field */}
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-secondary mb-3">
+            Email Address *
+          </label>
+          <input
+            type="email"
+            id="email"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            className={`form-input ${
+              errors.email ? 'border-red-500' : ''
+            }`}
+            placeholder="your.email@discoveryparks.com.au"
+            disabled={isSubmitting}
+          />
+          {errors.email && (
+            <p className="mt-2 text-sm text-accent bg-dark-surface-light px-3 py-2 rounded-lg">{errors.email}</p>
+          )}
+          <p className="mt-2 text-sm text-muted">
+            We'll use this to contact you on Teams about your report
+          </p>
         </div>
 
         {/* Category Field */}
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-grey-700 mb-2">
+          <label htmlFor="category" className="block text-sm font-medium text-secondary mb-3">
             Category
           </label>
           <select
             id="category"
             value={formData.category}
             onChange={(e) => handleInputChange('category', e.target.value as Category)}
-            className="w-full px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+            className="form-select"
             disabled={isSubmitting}
           >
+            <option value="Bug Report">Bug Report</option>
+            <option value="Feature Request">Feature Request</option>
             <option value="Access Request">Access Request</option>
-            <option value="Technical Issue">Technical Issue</option>
             <option value="General Support">General Support</option>
           </select>
         </div>
 
         {/* Priority Field */}
         <div>
-          <label htmlFor="priority" className="block text-sm font-medium text-grey-700 mb-2">
+          <label htmlFor="priority" className="block text-sm font-medium text-secondary mb-3">
             Priority
           </label>
           <select
             id="priority"
             value={formData.priority}
             onChange={(e) => handleInputChange('priority', e.target.value as Priority)}
-            className="w-full px-3 py-2 border border-grey-300 rounded-lg focus-ring"
+            className="form-select"
             disabled={isSubmitting}
           >
             <option value="Low">Low</option>
@@ -225,7 +261,7 @@ export default function CreateTicketPage() {
 
         {/* Description Field */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-grey-700 mb-2">
+          <label htmlFor="description" className="block text-sm font-medium text-secondary mb-3">
             Description *
           </label>
           <textarea
@@ -233,22 +269,22 @@ export default function CreateTicketPage() {
             value={formData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
             rows={6}
-            className={`w-full px-3 py-2 border rounded-lg focus-ring resize-none ${
-              errors.description ? 'border-red-300' : 'border-grey-300'
+            className={`form-textarea ${
+              errors.description ? 'border-red-500' : ''
             }`}
-            placeholder="Please provide detailed information about your request or issue..."
+            placeholder="Please provide detailed information about the bug you found or the feature you'd like to request..."
             disabled={isSubmitting}
           />
           {errors.description && (
-                         <p className="mt-1 text-sm text-black bg-accent px-2 py-1 rounded">{errors.description}</p>
+            <p className="mt-2 text-sm text-accent bg-dark-surface-light px-3 py-2 rounded-lg">{errors.description}</p>
           )}
-          <p className="mt-1 text-sm text-grey-500">
+          <p className="mt-2 text-sm text-muted">
             {formData.description.length}/1000 characters
           </p>
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end space-x-4 pt-4">
           <Link href="/" className="btn-secondary">
             Cancel
           </Link>
@@ -259,13 +295,13 @@ export default function CreateTicketPage() {
           >
             {isSubmitting ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-grey-900 mr-2"></div>
-                Creating...
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black mr-2"></div>
+                Submitting...
               </>
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Create Ticket
+                Submit Report
               </>
             )}
           </button>
@@ -273,13 +309,13 @@ export default function CreateTicketPage() {
       </form>
 
       {/* Help Text */}
-             <div className="mt-8 p-4 bg-accent rounded-lg">
-         <h3 className="text-sm font-medium text-black mb-2">💡 Tips for better support:</h3>
-         <ul className="text-sm text-black space-y-1">
-          <li>• Be specific about which AI tool you need access to</li>
-          <li>• Include error messages if you're reporting a technical issue</li>
-          <li>• Mention your business justification for access requests</li>
-          <li>• Check the Knowledge Base first for common questions</li>
+      <div className="mt-12 alert-attention-dark">
+        <h3 className="text-lg font-semibold text-accent mb-4">💡 Tips for effective reports:</h3>
+        <ul className="text-secondary space-y-2">
+          <li>• For bugs: Include steps to reproduce, expected vs actual behavior</li>
+          <li>• For features: Describe the problem it solves and who would benefit</li>
+          <li>• Include screenshots or examples when possible</li>
+          <li>• Check the Knowledge Base first for known issues</li>
         </ul>
       </div>
     </div>

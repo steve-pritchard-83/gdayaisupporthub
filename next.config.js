@@ -8,9 +8,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Set base path for GitHub Pages (repo name)
-  basePath: '/gdayaisupporthub',
-  assetPrefix: '/gdayaisupporthub',
+  // Set base path for GitHub Pages only in production
+  basePath: process.env.NODE_ENV === 'production' ? '/gdayaisupporthub' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/gdayaisupporthub' : '',
 }
 
 module.exports = nextConfig 

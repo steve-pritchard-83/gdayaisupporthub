@@ -62,6 +62,7 @@ module.exports = {
         // Yellow brand palette - strict branding
         'accent': '#ffdd00',
         'accent-dark': '#e6c600',
+        'accent-light': '#ffed4a',
         'yellow': {
           50: '#fffbf0',   // Lightest yellow background
           100: '#fff3d3',  // Light yellow background
@@ -74,6 +75,15 @@ module.exports = {
           800: '#b3a000',  // Darker yellow
           900: '#998c00',  // Darkest yellow
         },
+        // Theme colors using CSS variables
+        'primary': 'var(--text-primary)',
+        'secondary': 'var(--text-secondary)',
+        'muted': 'var(--text-muted)',
+        'surface': 'var(--surface-bg)',
+        'surface-light': 'var(--surface-light)',
+        'primary-bg': 'var(--primary-bg)',
+        'border-color': 'var(--border-color)',
+        'logo-text': 'var(--logo-text)',
       },
       fontFamily: {
         sans: ['Segoe UI', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'],

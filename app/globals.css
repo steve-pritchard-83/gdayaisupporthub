@@ -2,73 +2,373 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar styling */
+/* Theme Variables */
+:root {
+  --accent: #ffdd00;
+  --accent-dark: #e6c700;
+  --accent-light: #ffed4a;
+  
+  /* Grey scale for both themes */
+  --grey-50: #f9fafb;
+  --grey-100: #f3f4f6;
+  --grey-200: #e5e7eb;
+  --grey-300: #d1d5db;
+  --grey-400: #9ca3af;
+  --grey-500: #6b7280;
+  --grey-600: #4b5563;
+  --grey-700: #374151;
+  --grey-800: #1f2937;
+  --grey-900: #111827;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --primary-bg: #0f1419;
+  --surface-bg: #1a1f26;
+  --surface-light: #252b34;
+  --border-color: #2d3748;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --text-muted: #718096;
+  --logo-text: #ffffff;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --primary-bg: #ffffff;
+  --surface-bg: #f9fafb;
+  --surface-light: #ffffff;
+  --border-color: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --logo-text: #374151;
+}
+
+/* Base theme */
+body {
+  background-color: var(--primary-bg);
+  color: var(--text-primary);
+}
+
+/* Modern button system */
+.btn-primary {
+  @apply bg-accent text-black font-medium py-3 px-6 rounded-xl hover:bg-accent-dark transition-all duration-200 shadow-lg hover:shadow-xl;
+}
+
+.btn-secondary {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  @apply font-medium py-3 px-6 rounded-xl transition-all duration-200 border;
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--border-color);
+}
+
+.btn-outline {
+  @apply border-2 border-accent text-accent font-medium py-3 px-6 rounded-xl hover:bg-accent hover:text-black transition-all duration-200;
+}
+
+.btn-small {
+  @apply bg-accent text-black font-medium py-2 px-4 rounded-lg hover:bg-accent-dark transition-all duration-200 text-sm;
+}
+
+.btn-small-secondary {
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 border text-sm;
+  border-color: var(--border-color);
+}
+
+.btn-small-secondary:hover {
+  background-color: var(--border-color);
+}
+
+/* Modern card system */
+.card {
+  background-color: var(--surface-bg);
+  border-color: var(--border-color);
+  @apply rounded-2xl shadow-xl border p-8 backdrop-blur-sm;
+}
+
+.card-hover {
+  @apply hover:shadow-2xl hover:border-accent transition-all duration-300 cursor-pointer hover:scale-[1.02];
+}
+
+.card-compact {
+  background-color: var(--surface-bg);
+  border-color: var(--border-color);
+  @apply rounded-xl shadow-lg border p-6;
+}
+
+/* Navigation tabs */
+.nav-tabs {
+  background-color: var(--surface-light);
+  @apply flex space-x-1 rounded-xl p-1;
+}
+
+.nav-tab {
+  color: var(--text-secondary);
+  @apply px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200;
+}
+
+.nav-tab-active {
+  @apply bg-accent text-black shadow-lg;
+}
+
+/* Modern form controls */
+.form-input {
+  background-color: var(--surface-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  @apply w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200;
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-select {
+  background-color: var(--surface-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  @apply w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200;
+}
+
+.form-textarea {
+  background-color: var(--surface-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  @apply w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200 resize-none;
+}
+
+.form-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Data tables */
+.table-modern {
+  background-color: var(--surface-bg);
+  border-color: var(--border-color);
+  @apply w-full rounded-xl overflow-hidden shadow-lg border;
+}
+
+.table-header {
+  background-color: var(--surface-light);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+  @apply px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider border-b;
+}
+
+.table-cell {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  @apply px-6 py-4 border-b;
+}
+
+.table-row:hover {
+  background-color: var(--surface-light);
+}
+
+/* Status indicators */
+.status-open {
+  @apply bg-accent text-black px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+}
+
+.status-progress {
+  @apply bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+}
+
+.status-closed {
+  @apply bg-grey-600 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+}
+
+/* Priority badges */
+.priority-high {
+  @apply bg-accent text-black px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+}
+
+.priority-medium {
+  @apply bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+}
+
+.priority-low {
+  @apply bg-grey-500 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap;
+}
+
+/* Alert boxes */
+.alert-attention {
+  @apply bg-yellow-50 border border-yellow-200 rounded-xl p-4 backdrop-blur-sm;
+}
+
+.alert-attention-dark {
+  background-color: var(--surface-bg);
+  border-color: var(--accent);
+  @apply border rounded-xl p-4 backdrop-blur-sm;
+}
+
+/* Progress bars */
+.progress-bar {
+  background-color: var(--surface-light);
+  @apply w-full rounded-full h-2 overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-accent transition-all duration-300 rounded-full;
+}
+
+/* Toggle switches */
+.toggle-switch {
+  @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
+}
+
+.toggle-switch-on {
+  @apply bg-accent;
+}
+
+.toggle-switch-off {
+  background-color: var(--surface-light);
+}
+
+.toggle-thumb {
+  @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
+}
+
+.toggle-thumb-on {
+  @apply translate-x-6;
+}
+
+.toggle-thumb-off {
+  @apply translate-x-1;
+}
+
+/* Search */
+.search-container {
+  @apply relative max-w-md;
+}
+
+.search-input {
+  background-color: var(--surface-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  @apply w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-200;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-icon {
+  color: var(--text-muted);
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2;
+}
+
+/* Tooltips */
+.tooltip {
+  background-color: var(--surface-light);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  @apply absolute z-10 px-3 py-2 text-sm border rounded-lg shadow-lg;
+}
+
+/* Focus ring */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
+}
+
+/* Theme animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Menu system */
+.menu-item {
+  color: var(--text-primary);
+  @apply w-full px-4 py-3 text-left transition-colors duration-200 rounded-lg;
+}
+
+.menu-item:hover {
+  background-color: var(--surface-light);
+}
+
+.menu-item-active {
+  @apply bg-accent text-black;
+}
+
+.submenu-item {
+  color: var(--text-secondary);
+  @apply w-full px-6 py-2 text-left transition-colors duration-200 rounded-lg ml-4;
+}
+
+.submenu-item:hover {
+  background-color: var(--surface-light);
+}
+
+/* Additional animations */
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Focus states */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
+}
+
+/* Custom scrollbar styling for theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--surface-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--border-color);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--accent);
 }
 
-/* Custom focus styles */
-.focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
+/* Utility classes */
+.text-primary {
+  color: var(--text-primary);
 }
 
-/* Custom button styles */
-.btn-primary {
-  @apply bg-accent hover:bg-accent-dark text-grey-900 font-medium py-3 px-4 rounded-lg transition-colors focus-ring;
+.text-secondary {
+  color: var(--text-secondary);
 }
 
-.btn-secondary {
-  @apply bg-grey-200 hover:bg-grey-300 text-grey-700 font-medium py-3 px-4 rounded-lg transition-colors focus-ring;
+.text-muted {
+  color: var(--text-muted);
 }
 
-.btn-outline {
-  @apply border border-grey-300 hover:border-grey-400 text-grey-700 font-medium py-3 px-4 rounded-lg transition-colors focus-ring;
+.bg-primary {
+  background-color: var(--primary-bg);
 }
 
-/* Custom card styles */
-.card {
-  @apply bg-white rounded-xl shadow-sm border border-grey-200 p-6;
+.bg-surface {
+  background-color: var(--surface-bg);
 }
 
-.card-hover {
-  @apply hover:shadow-md transition-shadow;
+.bg-surface-light {
+  background-color: var(--surface-light);
 }
 
-/* Status indicators - Consistent yellow branding */
-.status-open {
-  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
-}
-
-.status-progress {
-  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
-}
-
-.status-closed {
-  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
-}
-
-/* Priority indicators - Consistent yellow branding */
-.priority-low {
-  @apply bg-grey-100 text-grey-700 px-2 py-1 rounded-full text-sm font-medium;
-}
-
-.priority-medium {
-  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
-}
-
-.priority-high {
-  @apply bg-accent text-black px-2 py-1 rounded-full text-sm font-medium;
+.border-color {
+  border-color: var(--border-color);
 } 
