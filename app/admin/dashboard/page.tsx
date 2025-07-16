@@ -224,7 +224,7 @@ export default function AdminDashboardPage() {
                 <BarChart3 className="w-6 h-6 text-black" />
               </div>
               <div>
-                <p className="text-sm font-medium text-secondary">Total Reports</p>
+                <p className="text-sm font-medium text-secondary">Total Tickets</p>
                 <p className="text-2xl font-bold text-primary">{analytics?.totalTickets || 0}</p>
               </div>
             </div>
@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
                 <Clock className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-secondary">Open Reports</p>
+                <p className="text-sm font-medium text-secondary">Open Tickets</p>
                 <p className="text-2xl font-bold text-primary">{analytics?.ticketsByStatus.open || 0}</p>
               </div>
             </div>
@@ -270,12 +270,12 @@ export default function AdminDashboardPage() {
         {/* Category Breakdown */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="card-compact">
-            <h3 className="text-lg font-semibold text-primary mb-4">Reports by Category</h3>
+            <h3 className="text-lg font-semibold text-primary mb-4">Tickets by Category</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-secondary">Bug Reports</span>
+                <span className="text-sm text-secondary">Bug Tickets</span>
                 <span className="text-sm font-medium text-primary">
-                  {tickets.filter(t => t.category === 'Bug Report').length}
+                  {tickets.filter(t => t.category === 'Bug Ticket').length}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -348,12 +348,12 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Report Management */}
+        {/* Ticket Management */}
         <div className="card">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-primary">Report Management</h2>
-              <p className="text-secondary">Manage all bug reports and feature requests with bulk operations</p>
+              <h2 className="text-xl font-bold text-primary">Ticket Management</h2>
+              <p className="text-secondary">Manage all bug tickets and feature requests with bulk operations</p>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -379,7 +379,7 @@ export default function AdminDashboardPage() {
             <div className="flex-1 search-container">
               <input
                 type="text"
-                placeholder="Search reports..."
+                placeholder="Search tickets..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -415,7 +415,7 @@ export default function AdminDashboardPage() {
             <div className="alert-attention-dark mb-6">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-primary">
-                  {selectedTickets.length} report(s) selected
+                  {selectedTickets.length} ticket(s) selected
                 </span>
                 <div className="flex items-center space-x-2">
                   <button
@@ -512,7 +512,7 @@ export default function AdminDashboardPage() {
 
           {filteredTickets.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-secondary">No reports found matching your criteria.</p>
+              <p className="text-secondary">No tickets found matching your criteria.</p>
             </div>
           )}
         </div>

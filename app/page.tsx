@@ -32,17 +32,17 @@ export default function HomePage() {
 
   const quickActions = [
     {
-      name: 'Report Bug or Request Feature',
+      name: 'Submit a Ticket',
       href: '/create',
       icon: Plus,
-      description: 'Submit a bug report or feature request',
+      description: 'Submit a new ticket for a bug or feature request',
       color: 'bg-accent hover:bg-accent-dark',
     },
     {
-      name: 'View All Reports',
+      name: 'View All Tickets',
       href: '/tickets',
       icon: Eye,
-      description: 'Browse and manage bug reports and feature requests',
+      description: 'Browse and manage all submitted tickets',
       color: 'bg-accent hover:bg-accent-dark',
     },
     {
@@ -56,14 +56,14 @@ export default function HomePage() {
 
   const statCards = [
     {
-      name: 'Total Reports',
+      name: 'Total Tickets',
       value: stats.total,
       icon: BarChart3,
       color: 'text-black',
       bgColor: 'bg-accent',
     },
     {
-      name: 'Open Reports',
+      name: 'Open Tickets',
       value: stats.open,
       icon: Clock,
       color: 'text-white',
@@ -77,7 +77,7 @@ export default function HomePage() {
       bgColor: 'bg-orange-500',
     },
     {
-      name: 'Closed Reports',
+      name: 'Closed Tickets',
       value: stats.closed,
       icon: CheckCircle,
       color: 'text-white',
@@ -90,11 +90,11 @@ export default function HomePage() {
       {/* Welcome Section */}
       <div className="text-center py-16">
         <h1 className="text-5xl font-bold text-primary mb-6">
-          Welcome to G&rsquo;day AI Support Hub
+          G'day AI Support Hub
         </h1>
         <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">
-          Your modern platform for reporting bugs, requesting features, and managing AI tool access. 
-          Submit reports, track progress, and find answers quickly with our streamlined interface.
+          Your modern platform for submitting tickets, requesting features, and managing AI tool access.
+          Submit tickets, track progress, and find answers quickly with our streamlined interface.
         </p>
       </div>
 
@@ -147,17 +147,17 @@ export default function HomePage() {
             <AlertCircle className="w-6 h-6 text-accent mr-4" />
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-primary">
-                High Priority Reports Require Attention
+                High Priority Tickets Require Attention
               </h3>
               <p className="text-secondary mt-1">
-                You have {stats.highPriority} high priority bug report{stats.highPriority > 1 ? 's' : ''} that need immediate attention.
+                You have {stats.highPriority} high priority bug ticket{stats.highPriority > 1 ? 's' : ''} that need immediate attention.
               </p>
             </div>
             <Link
-              href="/tickets"
+              href="/tickets?priority=High"
               className="btn-primary ml-4"
             >
-              View Reports
+              View Tickets
             </Link>
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function HomePage() {
           <div>
             <h3 className="text-xl font-semibold text-primary mb-4">New to AI Tools?</h3>
             <p className="text-secondary mb-6 leading-relaxed">
-              Start by browsing our knowledge base to understand what AI tools are available 
+              Start by browsing our knowledge base to understand what AI tools are available
               and how to request access.
             </p>
             <Link href="/knowledge" className="btn-outline">
@@ -180,11 +180,11 @@ export default function HomePage() {
           <div>
             <h3 className="text-xl font-semibold text-primary mb-4">Found an Issue?</h3>
             <p className="text-secondary mb-6 leading-relaxed">
-              Report a bug or request a new feature to help improve our AI tools 
+              Report a bug or request a new feature to help improve our AI tools
               and services for everyone.
             </p>
             <Link href="/create" className="btn-primary">
-              Report Bug or Request Feature
+              Submit a Ticket
             </Link>
           </div>
         </div>

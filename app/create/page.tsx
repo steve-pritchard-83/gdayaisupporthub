@@ -89,28 +89,29 @@ export default function CreateTicketPage() {
       };
       
       // Save to localStorage
-      const success = saveTicket(newTicket);
-      
-      if (success) {
-        setSubmitSuccess(true);
-        // Reset form
-        setFormData({
-          title: '',
-          description: '',
-          priority: 'Medium',
-          category: 'Bug Report',
-          email: '',
-        });
-        
-        // Redirect after short delay
-        setTimeout(() => {
-          router.push('/tickets');
-        }, 2000);
-      } else {
-        throw new Error('Failed to save ticket');
+      if (typeof window !== 'undefined') {
+        const success = saveTicket(newTicket);
+        if (success) {
+          setSubmitSuccess(true);
+          // Reset form
+          setFormData({
+            title: '',
+            description: '',
+            priority: 'Medium',
+            category: 'Bug Report',
+            email: '',
+          });
+          
+          // Redirect after short delay
+          setTimeout(() => {
+            router.push('/tickets');
+          }, 2000);
+        } else {
+          throw new Error('Failed to save ticket');
+        }
       }
     } catch (error) {
-      setSubmitError('Failed to submit report. Please try again.');
+      setSubmitError('Failed to submit ticket. Please try again.');
       console.error('Error creating ticket:', error);
     } finally {
       setIsSubmitting(false);
@@ -135,13 +136,13 @@ export default function CreateTicketPage() {
             <CheckCircle className="w-10 h-10 text-black" />
           </div>
           <h1 className="text-3xl font-bold text-primary mb-6">
-            Report Submitted Successfully!
+            Ticket Submitted Successfully!
           </h1>
           <p className="text-secondary mb-8 leading-relaxed">
-            Your bug report or feature request has been submitted and will be reviewed by our team. You'll be redirected to the tickets page shortly.
+            Your bug ticket or feature request has been submitted and will be reviewed by our team. You'll be redirected to the tickets page shortly.
           </p>
           <Link href="/tickets" className="btn-primary">
-            View All Reports
+            View All Tickets
           </Link>
         </div>
       </div>
@@ -159,9 +160,9 @@ export default function CreateTicketPage() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
         </Link>
-        <h1 className="text-4xl font-bold text-primary mb-4">Report Bug or Request Feature</h1>
+        <h1 className="text-4xl font-bold text-primary mb-4">Create a New Ticket</h1>
         <p className="text-secondary text-lg leading-relaxed">
-          Submit a bug report, feature request, or AI tool access request to help improve our platform.
+          Submit a bug ticket, feature request, or AI tool access request to help improve our platform.
         </p>
       </div>
 
@@ -190,7 +191,7 @@ export default function CreateTicketPage() {
             className={`form-input ${
               errors.title ? 'border-red-500' : ''
             }`}
-            placeholder="Brief description of the bug or feature you'd like to report..."
+            placeholder="Brief description of the bug or feature..."
             disabled={isSubmitting}
           />
           {errors.title && (
@@ -201,7 +202,7 @@ export default function CreateTicketPage() {
         {/* Email Field */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-secondary mb-3">
-            Email Address *
+            Your G'day Group Email *
           </label>
           <input
             type="email"
@@ -211,14 +212,14 @@ export default function CreateTicketPage() {
             className={`form-input ${
               errors.email ? 'border-red-500' : ''
             }`}
-            placeholder="your.email@discoveryparks.com.au"
+            placeholder="steve.pritchard@gdaygroup.com.au"
             disabled={isSubmitting}
           />
           {errors.email && (
             <p className="mt-2 text-sm text-accent bg-dark-surface-light px-3 py-2 rounded-lg">{errors.email}</p>
           )}
           <p className="mt-2 text-sm text-muted">
-            We'll use this to contact you on Teams about your report
+            We'll use this to contact you on Teams about your ticket
           </p>
         </div>
 
@@ -234,7 +235,7 @@ export default function CreateTicketPage() {
             className="form-select"
             disabled={isSubmitting}
           >
-            <option value="Bug Report">Bug Report</option>
+            <option value="Bug Ticket">Bug Ticket</option>
             <option value="Feature Request">Feature Request</option>
             <option value="Access Request">Access Request</option>
             <option value="General Support">General Support</option>
@@ -301,7 +302,7 @@ export default function CreateTicketPage() {
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Submit Report
+                Submit Ticket
               </>
             )}
           </button>
@@ -310,12 +311,13 @@ export default function CreateTicketPage() {
 
       {/* Help Text */}
       <div className="mt-12 alert-attention-dark">
-        <h3 className="text-lg font-semibold text-accent mb-4">💡 Tips for effective reports:</h3>
+        <h3 className="text-lg font-semibold text-accent mb-4">�� Tips for effective tickets:</h3>
         <ul className="text-secondary space-y-2">
-          <li>• For bugs: Include steps to reproduce, expected vs actual behavior</li>
-          <li>• For features: Describe the problem it solves and who would benefit</li>
-          <li>• Include screenshots or examples when possible</li>
-          <li>• Check the Knowledge Base first for known issues</li>
+          <li><strong>Be Specific:</strong> Provide a clear, concise title.</li>
+          <li><strong>Steps to Reproduce:</strong> For bugs, list the exact steps to trigger the issue.</li>
+          <li><strong>Expected vs. Actual:</strong> Clearly describe what you expected to happen and what actually happened.</li>
+          <li><strong>Context is Key:</strong> Mention the AI tool, browser, or any relevant details.</li>
+          <li><strong>One Issue Per Ticket:</strong> Submit separate tickets for unrelated issues to ensure faster processing.</li>
         </ul>
       </div>
     </div>

@@ -201,7 +201,7 @@ interface Ticket {
   title: string;                 // Required, 5-100 chars
   description: string;           // Required, 10-1000 chars
   priority: 'Low' | 'Medium' | 'High';
-  category: 'Bug Report' | 'Feature Request' | 'Access Request' | 'General Support';
+  category: 'Bug Ticket' | 'Feature Request' | 'Access Request' | 'General Support';
   status: 'Open' | 'In Progress' | 'Closed';
   email: string;                 // User email for Teams contact
   createdDate: string;           // ISO string

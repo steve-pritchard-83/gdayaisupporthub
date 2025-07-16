@@ -31,7 +31,7 @@ export interface AdminAnalytics {
   };
   ticketsByCategory: {
     accessRequest: number;
-    bugReport: number;
+    bugTicket: number;
     featureRequest: number;
     generalSupport: number;
   };

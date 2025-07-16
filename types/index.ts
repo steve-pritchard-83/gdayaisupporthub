@@ -2,7 +2,7 @@
 export type Priority = 'Low' | 'Medium' | 'High';
 
 // Ticket categories
-export type Category = 'Bug Report' | 'Feature Request' | 'Access Request' | 'General Support';
+export type Category = 'Bug Ticket' | 'Feature Request' | 'Access Request' | 'General Support';
 
 // Ticket status
 export type Status = 'Open' | 'In Progress' | 'Closed';

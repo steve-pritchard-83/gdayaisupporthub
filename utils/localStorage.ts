@@ -1,4 +1,4 @@
-import { Ticket, KnowledgeArticle, TicketStats } from '@/types';
+import { Ticket, KnowledgeArticle, TicketStats, Category } from '@/types';
 
 // Storage keys
 const TICKETS_KEY = 'gday-support-tickets';
@@ -36,7 +36,17 @@ export const getTickets = (): Ticket[] => {
   if (!data) return [];
   
   try {
-    return JSON.parse(data);
+    const tickets: Ticket[] = JSON.parse(data);
+    
+    // Data migration: Update 'Bug Report' to 'Bug Ticket'
+    const migratedTickets = tickets.map(ticket => {
+      if ((ticket.category as string) === 'Bug Report') {
+        return { ...ticket, category: 'Bug Ticket' as Category };
+      }
+      return ticket;
+    });
+
+    return migratedTickets;
   } catch (error) {
     console.error('Failed to parse tickets data:', error);
     return [];
@@ -87,10 +97,10 @@ export const getDefaultKnowledgeArticles = (): KnowledgeArticle[] => {
   return [
     {
       id: 'faq-1',
-      title: 'How do I report a bug effectively?',
-      content: 'To report a bug effectively: 1) Choose "Bug Report" category, 2) Include steps to reproduce the issue, 3) Describe expected vs actual behavior, 4) Mention which AI tool is affected, 5) Include screenshots if possible. The more details you provide, the faster we can resolve the issue.',
-      category: 'Bug Report',
-      tags: ['bug-report', 'troubleshooting', 'reporting'],
+      title: 'How do I submit a bug ticket effectively?',
+      content: 'To submit a bug ticket effectively: 1) Choose "Bug Ticket" category, 2) Include steps to reproduce the issue, 3) Describe expected vs actual behavior, 4) Mention which AI tool is affected, 5) Include screenshots if possible. The more details you provide, the faster we can resolve the issue.',
+      category: 'Bug Ticket',
+      tags: ['bug-ticket', 'troubleshooting', 'ticketing'],
       createdDate: '2024-01-01T00:00:00Z'
     },
     {
@@ -104,8 +114,8 @@ export const getDefaultKnowledgeArticles = (): KnowledgeArticle[] => {
     {
       id: 'faq-3',
       title: 'Common AI tool troubleshooting steps',
-      content: 'Before reporting a bug, try these steps: 1) Refresh your browser/restart the application, 2) Check internet connection, 3) Clear browser cache and cookies, 4) Try a different browser, 5) Check if the issue happens with different AI tools. If problems persist, report a bug with these steps documented.',
-      category: 'Bug Report',
+      content: 'Before submitting a bug ticket, try these steps: 1) Refresh your browser/restart the application, 2) Check internet connection, 3) Clear browser cache and cookies, 4) Try a different browser, 5) Check if the issue happens with different AI tools. If problems persist, submit a bug ticket with these steps documented.',
+      category: 'Bug Ticket',
       tags: ['troubleshooting', 'technical', 'self-help'],
       createdDate: '2024-01-01T00:00:00Z'
     },
@@ -113,7 +123,7 @@ export const getDefaultKnowledgeArticles = (): KnowledgeArticle[] => {
       id: 'faq-4',
       title: 'How long does bug resolution take?',
       content: 'Bug resolution timelines vary by severity: Critical bugs (system down) - 4 hours, High priority bugs - 1-2 days, Medium priority bugs - 1 week, Low priority bugs - 2-4 weeks. You\'ll receive updates on progress and be notified when the bug is resolved.',
-      category: 'Bug Report',
+      category: 'Bug Ticket',
       tags: ['timeline', 'resolution', 'priority'],
       createdDate: '2024-01-01T00:00:00Z'
     },
@@ -149,7 +159,7 @@ export const getDefaultTickets = (): Ticket[] => {
       title: 'ChatGPT returns error when generating long responses',
       description: 'When requesting ChatGPT to generate responses longer than 2000 characters, it returns a "Request timeout" error. This happens consistently across different prompts.\n\nSteps to reproduce:\n1. Open ChatGPT interface\n2. Request a long response (e.g., "Write a 3000-word essay about AI")\n3. Error appears after 30 seconds\n\nExpected: Long response should be generated successfully\nActual: Timeout error is shown',
       priority: 'High',
-      category: 'Bug Report',
+      category: 'Bug Ticket',
       status: 'Open',
       email: 'sarah.johnson@discoveryparks.com.au',
       createdDate: '2024-12-13T10:30:00Z'
@@ -169,7 +179,7 @@ export const getDefaultTickets = (): Ticket[] => {
       title: 'GitHub Copilot suggestions not appearing in VS Code',
       description: 'GitHub Copilot is not showing any code suggestions in VS Code, even though the extension is installed and I have active access.\n\nTroubleshooting attempted:\n• Restarted VS Code\n• Disabled and re-enabled the extension\n• Checked internet connection\n• Verified account permissions\n\nThe status bar shows "Copilot: Ready" but no suggestions appear while typing.',
       priority: 'High',
-      category: 'Bug Report',
+      category: 'Bug Ticket',
       status: 'Closed',
       email: 'alex.rodriguez@discoveryparks.com.au',
       createdDate: '2024-12-11T09:45:00Z'
@@ -189,7 +199,7 @@ export const getDefaultTickets = (): Ticket[] => {
       title: 'Midjourney images fail to load in shared workspace',
       description: 'When multiple users try to access Midjourney-generated images in our shared workspace, images fail to load with a "403 Forbidden" error.\n\nError details:\n• Occurs only in shared workspace, not personal workspaces\n• Affects all image formats (PNG, JPG, WEBP)\n• Browser console shows CORS policy error\n• Images load fine when accessed directly from Midjourney\n\nImpact: Team cannot collaborate on visual projects effectively',
       priority: 'Medium',
-      category: 'Bug Report',
+      category: 'Bug Ticket',
       status: 'In Progress',
       email: 'david.taylor@discoveryparks.com.au',
       createdDate: '2024-12-09T11:30:00Z'

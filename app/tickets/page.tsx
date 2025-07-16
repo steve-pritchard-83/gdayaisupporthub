@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, Filter, Plus, ArrowLeft, Clock, CheckCircle, AlertCircle, Calendar, User, Mail } from 'lucide-react';
+import { Search, Filter, Plus, ArrowLeft, Clock, CheckCircle, AlertCircle, Calendar, User, Mail, Bug, Lightbulb, KeyRound, Info, Copy } from 'lucide-react';
 import { Ticket, TicketFilters, Priority, Category, Status } from '@/types';
 import { getTickets, saveTicket, deleteTicket } from '@/utils/localStorage';
 import { isAdminAuthenticated } from '@/utils/adminAuth';
@@ -12,6 +12,7 @@ export default function ViewTicketsPage() {
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [copiedTicketId, setCopiedTicketId] = useState<string | null>(null);
   
   const [filters, setFilters] = useState<TicketFilters>({
     searchTerm: '',
@@ -93,6 +94,14 @@ export default function ViewTicketsPage() {
     }
   };
 
+  // Handle copying email
+  const handleCopyEmail = (email: string, ticketId: string) => {
+    navigator.clipboard.writeText(email).then(() => {
+      setCopiedTicketId(ticketId);
+      setTimeout(() => setCopiedTicketId(null), 2000); // Hide message after 2 seconds
+    });
+  };
+
   // Handle ticket deletion
   const handleDeleteTicket = async (ticketId: string) => {
     if (window.confirm('Are you sure you want to delete this ticket?')) {
@@ -133,6 +142,17 @@ export default function ViewTicketsPage() {
     }
   };
 
+  // Get category icon
+  const getCategoryIcon = (category: Category) => {
+    switch (category) {
+      case 'Bug Ticket': return Bug;
+      case 'Feature Request': return Lightbulb;
+      case 'Access Request': return KeyRound;
+      case 'General Support': return Info;
+      default: return User; // Fallback
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -155,15 +175,15 @@ export default function ViewTicketsPage() {
               Back to Home
             </Link>
           </div>
-          <h1 className="text-4xl font-bold text-primary mb-2">Bug Reports & Feature Requests</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">Tickets & Requests</h1>
           <p className="text-secondary text-lg">
-            Track and manage all submitted reports and requests
+            Track and manage all submitted tickets and requests
           </p>
         </div>
         
         <Link href="/create" className="btn-primary">
           <Plus className="w-4 h-4 mr-2" />
-          New Report
+          New Ticket
         </Link>
       </div>
 
@@ -174,7 +194,7 @@ export default function ViewTicketsPage() {
           <div className="flex-1 search-container">
             <input
               type="text"
-              placeholder="Search reports..."
+              placeholder="Search tickets..."
               value={filters.searchTerm}
               onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
               className="search-input"
@@ -250,7 +270,7 @@ export default function ViewTicketsPage() {
                   className="form-select"
                 >
                   <option value="">All Categories</option>
-                  <option value="Bug Report">Bug Report</option>
+                  <option value="Bug Ticket">Bug Ticket</option>
                   <option value="Feature Request">Feature Request</option>
                   <option value="Access Request">Access Request</option>
                   <option value="General Support">General Support</option>
@@ -274,12 +294,12 @@ export default function ViewTicketsPage() {
       {/* Results Summary */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-secondary">
-          {filteredTickets.length} of {tickets.length} reports
+          {filteredTickets.length} of {tickets.length} tickets
         </p>
         
         {filteredTickets.length === 0 && tickets.length > 0 && (
           <p className="text-sm text-muted">
-            No reports match your current filters
+            No tickets match your current filters
           </p>
         )}
       </div>
@@ -292,31 +312,31 @@ export default function ViewTicketsPage() {
               <AlertCircle className="w-8 h-8 text-secondary" />
             </div>
             <h3 className="text-lg font-semibold text-primary mb-2">
-              {tickets.length === 0 ? 'No Reports Yet' : 'No Reports Found'}
+              {tickets.length === 0 ? 'No Tickets Yet' : 'No Tickets Found'}
             </h3>
             <p className="text-secondary mb-6">
               {tickets.length === 0 
-                ? 'Start by creating your first bug report or feature request.'
+                ? 'Start by creating your first bug ticket or feature request.'
                 : 'Try adjusting your search or filter criteria.'
               }
             </p>
             {tickets.length === 0 && (
               <Link href="/create" className="btn-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Create First Report
+                Create First Ticket
               </Link>
             )}
           </div>
         ) : (
           filteredTickets.map((ticket) => {
-            const StatusIcon = getStatusIcon(ticket.status);
+            const CategoryIcon = getCategoryIcon(ticket.category);
             
             return (
               <div key={ticket.id} className="card-compact card-hover">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <StatusIcon className="w-5 h-5 text-secondary" />
+                      <CategoryIcon className="w-5 h-5 text-secondary" />
                       <h3 className="text-lg font-semibold text-primary">{ticket.title}</h3>
                     </div>
                     
@@ -332,14 +352,23 @@ export default function ViewTicketsPage() {
                         <Calendar className="w-4 h-4" />
                         <span>{new Date(ticket.createdDate).toLocaleDateString()}</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <User className="w-4 h-4" />
-                        <span>{ticket.category}</span>
-                      </div>
                       {isAdmin && (
-                        <div className="flex items-center gap-1">
-                          <Mail className="w-4 h-4" />
-                          <span>{ticket.email}</span>
+                        <div
+                          className="flex items-center gap-1 cursor-pointer hover:text-accent"
+                          onClick={() => handleCopyEmail(ticket.email, ticket.id)}
+                        >
+                          {copiedTicketId === ticket.id ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                              <span className="text-green-500">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="w-4 h-4" />
+                              <span>{ticket.email}</span>
+                              <Copy className="w-3 h-3 ml-1" />
+                            </>
+                          )}
                         </div>
                       )}
                     </div>

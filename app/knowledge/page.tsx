@@ -83,7 +83,7 @@ export default function KnowledgeBasePage() {
   // Get category styling
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'Bug Report':
+      case 'Bug Ticket':
         return 'bg-red-500 text-white';
       case 'Feature Request':
         return 'bg-accent text-black';
@@ -120,7 +120,7 @@ export default function KnowledgeBasePage() {
         
         <h1 className="text-5xl font-bold text-primary mb-6">Knowledge Base</h1>
         <p className="text-xl text-secondary max-w-2xl mx-auto leading-relaxed">
-          Find answers to frequently asked questions about bug reporting, feature requests, and AI tool access.
+          Find answers to frequently asked questions about bug tickets, feature requests, and AI tool access.
         </p>
       </div>
 
@@ -186,9 +186,9 @@ export default function KnowledgeBasePage() {
           <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-lg font-semibold text-primary mb-2">Bug Reports</h3>
+          <h3 className="text-lg font-semibold text-primary mb-2">Bug Tickets</h3>
           <p className="text-sm text-secondary">
-            Learn how to report bugs effectively and get them resolved quickly.
+            Learn how to submit bug tickets effectively and get them resolved quickly.
           </p>
         </div>
         
@@ -328,10 +328,10 @@ export default function KnowledgeBasePage() {
           Still need help?
         </h3>
         <p className="text-secondary mb-6 leading-relaxed">
-          Can't find the answer you're looking for? Create a bug report or feature request and our team will assist you.
+          Can't find the answer you're looking for? Create a bug ticket or feature request and our team will assist you.
         </p>
         <Link href="/create" className="btn-primary">
-          Report Bug or Request Feature
+          Submit a Ticket
         </Link>
       </div>
     </div>
