@@ -9,8 +9,8 @@ const nextConfig = {
     unoptimized: true,
   },
   // Set base path for GitHub Pages only in production
-  basePath: '',
-  assetPrefix: '',
+  basePath: '/gdayaisupporthub',
+  assetPrefix: '/gdayaisupporthub',
 }
 
 module.exports = nextConfig 
